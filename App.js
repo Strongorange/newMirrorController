@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import firestore from "@react-native-firebase/firestore";
 
 const View = styled.View`
@@ -17,23 +17,41 @@ const Image = styled.Image`
 `;
 
 const App = () => {
-  const data = async () => {
-    const temp = await firestore().collection("mirror").doc("gallery").get();
-    console.log(temp);
-  };
+  const [photos, setPhotos] = useState(null);
+  const [schedules, setSchedules] = useState(null);
+
+  function onResultPhoto(QuerySnapshot) {
+    // console.log(QuerySnapshot.data());
+    setPhotos(QuerySnapshot.data().photos);
+  }
+
+  function onResultSchedule(QuerySnapshot) {
+    //console.log(QuerySnapshot._data);
+  }
+
+  function onError(error) {
+    console.error(error);
+  }
 
   useEffect(() => {
-    const temp = data();
-  });
+    firestore()
+      .collection("mirror")
+      .doc("gallery")
+      .onSnapshot(onResultPhoto, onError);
 
+    firestore()
+      .collection("mirror")
+      .doc("schedules")
+      .onSnapshot(onResultSchedule, onError);
+  }, []);
+  console.log(photos);
   return (
     <View>
-      <Text>hihihi</Text>
-      <Image
-        source={{
-          uri: "https://firebasestorage.googleapis.com/v0/b/newmirror-8ded5.appspot.com/o/ezgif-4-d8c432d814.gif?alt=media&token=a89744d4-6525-4d7f-b960-ce243923949a",
-        }}
-      />
+      {photos === null ? (
+        <Text>노루를 데려오는 중</Text>
+      ) : (
+        photos.map((c, i) => <Image source={{ uri: `${c}` }} key={i} />)
+      )}
     </View>
   );
 };
