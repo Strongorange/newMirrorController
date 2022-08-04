@@ -301,10 +301,10 @@ const App = () => {
         <HView>
           <Text>저장된 사진 ({storagePhotos.length})</Text>
           <EditBtn onPress={() => setIsEdit((state) => !state)}>
-            <Text>수정 {String(isEdit)}</Text>
+            <Text>수정</Text>
           </EditBtn>
           <EditBtn onPress={() => setIsChange((state) => !state)}>
-            <Text>현재 사진 변경 {String(isChange)}</Text>
+            <Text>현재 사진 변경 </Text>
           </EditBtn>
           <AddBtn onPress={() => pickImage()}>
             <Text>사진추가</Text>
