@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from "styled-components/native";
 import React, { useState, useEffect } from "react";
 import firestore from "@react-native-firebase/firestore";
 import { initializeApp } from "firebase/app";
@@ -28,26 +28,25 @@ const View = styled.View`
   align-items: center;
 `;
 
-const View2 = styled(View)``;
+const View2 = styled(View)`
+  flex: 1;
+`;
 
-const StorageImageView = styled.View`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
+const StorageImageView = styled.FlatList`
+  flex: 1;
 `;
 
 const Text = styled.Text``;
 
 const Image = styled.Image`
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 150px;
 `;
 
 const App = () => {
-  const [photos, setPhotos] = useState(null);
+  const [photos, setPhotos] = useState([]);
   const [storagePhotos, setStoragePhotos] = useState([]);
-  const [schedules, setSchedules] = useState(null);
+  const [schedules, setSchedules] = useState([]);
 
   function onResultPhoto(QuerySnapshot) {
     // console.log(QuerySnapshot.data());
@@ -87,7 +86,11 @@ const App = () => {
         console.log(error);
       });
   }, []);
-  console.log(storagePhotos);
+
+  const renderItem = ({ item }) => {
+    return <Image source={{ uri: `${item}` }} />;
+  };
+
   return (
     <View>
       <View>
@@ -99,16 +102,16 @@ const App = () => {
         )}
       </View>
       <View2>
-        <Text>스토리지</Text>
-        <StorageImageView>
-          {storagePhotos === null ? (
-            <Text>노루를 데려오는 중</Text>
-          ) : (
-            storagePhotos.map((c, i) => (
-              <Image source={{ uri: `${c}` }} key={i} />
-            ))
-          )}
-        </StorageImageView>
+        <Text>저장된 사진 ({storagePhotos.length})</Text>
+        {storagePhotos.length > 0 ? (
+          <StorageImageView
+            data={storagePhotos}
+            renderItem={renderItem}
+            horizontal={true}
+          />
+        ) : (
+          <Text>노루를 데려오는 중</Text>
+        )}
       </View2>
     </View>
   );
