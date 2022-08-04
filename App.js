@@ -8,8 +8,11 @@ import {
   listAll,
   getDownloadURL,
   deleteObject,
+  uploadBytes,
 } from "firebase/storage";
 import { Dimensions, Alert } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import uuid from "uuid";
 
 const width = Math.floor(Dimensions.get("window").width);
 
@@ -76,6 +79,8 @@ const App = () => {
   const [storagePhotos, setStoragePhotos] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
+  const [image, setImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   function onResultPhoto(QuerySnapshot) {
     // console.log(QuerySnapshot.data());
@@ -162,6 +167,56 @@ const App = () => {
     );
   };
 
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.cancelled) {
+      setImage(result.uri);
+    }
+
+    setIsLoading((state) => true);
+
+    try {
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+          resolve(xhr.response);
+        };
+        xhr.onerror = function (e) {
+          console.log(e);
+          reject(new TypeError("Network request failed"));
+        };
+        xhr.responseType = "blob";
+        xhr.open("GET", result.uri, true);
+        xhr.send(null);
+      });
+
+      const fileRef = ref(storage, uuid.v4());
+
+      const storagePath = fileRef._location.path;
+      const result2 = await uploadBytes(fileRef, blob);
+
+      blob.close();
+      const downloadUrl = await getDownloadURL(fileRef);
+      setStoragePhotos((state) => [
+        ...state,
+        { uri: downloadUrl, path: storagePath },
+      ]);
+      console.log("업로드 끝");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading((state) => false);
+    }
+  };
+
   return (
     <View>
       <View>
@@ -178,8 +233,12 @@ const App = () => {
           <EditBtn onPress={() => setIsEdit((state) => !state)}>
             <Text>수정 {String(isEdit)}</Text>
           </EditBtn>
+          <AddBtn onPress={() => pickImage()}>
+            <Text>사진추가</Text>
+          </AddBtn>
         </HView>
-        {storagePhotos.length > 0 ? (
+
+        {!isLoading && storagePhotos.length > 0 ? (
           <StorageImageView
             data={storagePhotos}
             renderItem={renderItem}
