@@ -10,6 +10,7 @@ import {
   deleteObject,
   uploadBytes,
 } from "firebase/storage";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { Dimensions, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import uuid from "uuid";
@@ -72,19 +73,29 @@ const DeleteBtn = styled.TouchableOpacity`
   border-radius: 5px;
 `;
 
+const SelectBtn = styled.TouchableOpacity`
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: green;
+  padding: 10px;
+  border-radius: 5px;
+`;
+
 const AddBtn = styled.TouchableOpacity``;
 
 const App = () => {
-  const [photos, setPhotos] = useState([]);
+  const [photosArr, setPhotosArr] = useState([]);
   const [storagePhotos, setStoragePhotos] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
   const [image, setImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isChange, setIsChange] = useState(false);
 
   function onResultPhoto(QuerySnapshot) {
     // console.log(QuerySnapshot.data());
-    setPhotos(QuerySnapshot.data().photos);
+    setPhotosArr(QuerySnapshot.data().photos);
   }
 
   function onResultSchedule(QuerySnapshot) {
@@ -162,6 +173,63 @@ const App = () => {
           <Text>삭제</Text>
         </DeleteBtn>
       </>
+    ) : isChange ? (
+      <>
+        <Image source={{ uri: `${item.uri}` }} />
+        <SelectBtn
+          onPress={async () => {
+            Alert.alert("미러 사진 변경", "사진을 어디 놓을까요?", [
+              {
+                text: "취소",
+                style: "cancel",
+              },
+              {
+                text: "첫번째",
+                onPress: () => {
+                  try {
+                    setIsLoading(true);
+                    setPhotosArr((state) => [item.uri, state[1]]);
+                  } catch (error) {
+                    console.log(error);
+                  } finally {
+                    setIsLoading(false);
+                    setIsChange(false);
+                  }
+                  firestore()
+                    .collection("mirror")
+                    .doc("gallery")
+                    .set({
+                      photos: [item.uri, photosArr[1]],
+                    });
+                },
+              },
+              {
+                text: "두번째",
+                onPress: () => {
+                  try {
+                    setIsLoading(true);
+                    setPhotosArr((state) => [state[0], item.uri]);
+                  } catch (error) {
+                    console.log(error);
+                  } finally {
+                    setIsLoading(false);
+                    setIsChange(false);
+                  }
+                  firestore()
+                    .collection("mirror")
+                    .doc("gallery")
+                    .set({
+                      photos: [photosArr[0], item.uri],
+                    });
+                },
+              },
+            ]);
+            console.log(item);
+          }}
+        >
+          <Text>선택</Text>
+        </SelectBtn>
+      </>
     ) : (
       <Image source={{ uri: `${item.uri}` }} />
     );
@@ -220,11 +288,13 @@ const App = () => {
   return (
     <View>
       <View>
-        <Text>현재</Text>
-        {photos === null ? (
+        <HView>
+          <Text>현재</Text>
+        </HView>
+        {photosArr === null ? (
           <Text>노루를 데려오는 중</Text>
         ) : (
-          photos.map((c, i) => <Image source={{ uri: `${c}` }} key={i} />)
+          photosArr.map((c, i) => <Image source={{ uri: `${c}` }} key={i} />)
         )}
       </View>
       <View2>
@@ -232,6 +302,9 @@ const App = () => {
           <Text>저장된 사진 ({storagePhotos.length})</Text>
           <EditBtn onPress={() => setIsEdit((state) => !state)}>
             <Text>수정 {String(isEdit)}</Text>
+          </EditBtn>
+          <EditBtn onPress={() => setIsChange((state) => !state)}>
+            <Text>현재 사진 변경 {String(isChange)}</Text>
           </EditBtn>
           <AddBtn onPress={() => pickImage()}>
             <Text>사진추가</Text>
