@@ -2,7 +2,16 @@ import styled from "styled-components/native";
 import React, { useState, useEffect } from "react";
 import firestore from "@react-native-firebase/firestore";
 import { initializeApp } from "firebase/app";
-import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage";
+import {
+  getStorage,
+  ref,
+  listAll,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import { Dimensions, Alert } from "react-native";
+
+const width = Math.floor(Dimensions.get("window").width);
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -28,8 +37,13 @@ const View = styled.View`
   align-items: center;
 `;
 
-const View2 = styled(View)`
-  flex: 1;
+const View2 = styled(View)``;
+
+const HView = styled.View`
+  display: flex;
+  flex-direction: row;
+  width: ${`${width}px`};
+  justify-content: space-evenly;
 `;
 
 const StorageImageView = styled.FlatList`
@@ -39,14 +53,29 @@ const StorageImageView = styled.FlatList`
 const Text = styled.Text``;
 
 const Image = styled.Image`
-  width: 150px;
-  height: 150px;
+  width: ${`${width / 3}px`};
+  height: ${`${width / 3}px`};
+  position: relative;
 `;
+
+const EditBtn = styled.TouchableOpacity``;
+
+const DeleteBtn = styled.TouchableOpacity`
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: red;
+  padding: 10px;
+  border-radius: 5px;
+`;
+
+const AddBtn = styled.TouchableOpacity``;
 
 const App = () => {
   const [photos, setPhotos] = useState([]);
   const [storagePhotos, setStoragePhotos] = useState([]);
   const [schedules, setSchedules] = useState([]);
+  const [isEdit, setIsEdit] = useState(false);
 
   function onResultPhoto(QuerySnapshot) {
     // console.log(QuerySnapshot.data());
@@ -77,7 +106,10 @@ const App = () => {
         res.items.forEach((itemRef) => {
           const reference = ref(storage, itemRef.fullPath);
           getDownloadURL(reference).then((res) => {
-            setStoragePhotos((state) => [...state, res]);
+            setStoragePhotos((state) => [
+              ...state,
+              { uri: res, path: reference._location.path },
+            ]);
           });
         });
       })
@@ -88,7 +120,46 @@ const App = () => {
   }, []);
 
   const renderItem = ({ item }) => {
-    return <Image source={{ uri: `${item}` }} />;
+    return isEdit ? (
+      <>
+        <Image source={{ uri: `${item.uri}` }} />
+        <DeleteBtn
+          onPress={() => {
+            Alert.alert("경고", "정말 지우려구?", [
+              {
+                text: "Cancel",
+                onPress: () => console.log("Cancel Pressed"),
+                style: "cancel",
+              },
+              {
+                text: "OK",
+                onPress: () => {
+                  console.log("OK Pressed");
+                  console.log(item.path);
+                  const delRef = ref(storage, item.path);
+                  deleteObject(delRef)
+                    .then(() => {
+                      setStoragePhotos((state) =>
+                        state.filter((current) => {
+                          return current.path !== item.path;
+                        })
+                      );
+                      console.log("삭제됨");
+                    })
+                    .catch((error) => {
+                      console.log(error);
+                    });
+                },
+              },
+            ]);
+          }}
+        >
+          <Text>삭제</Text>
+        </DeleteBtn>
+      </>
+    ) : (
+      <Image source={{ uri: `${item.uri}` }} />
+    );
   };
 
   return (
@@ -102,7 +173,12 @@ const App = () => {
         )}
       </View>
       <View2>
-        <Text>저장된 사진 ({storagePhotos.length})</Text>
+        <HView>
+          <Text>저장된 사진 ({storagePhotos.length})</Text>
+          <EditBtn onPress={() => setIsEdit((state) => !state)}>
+            <Text>수정 {String(isEdit)}</Text>
+          </EditBtn>
+        </HView>
         {storagePhotos.length > 0 ? (
           <StorageImageView
             data={storagePhotos}
