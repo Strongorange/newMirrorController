@@ -14,6 +14,8 @@ import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { Dimensions, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import uuid from "uuid";
+import { BG_COLOR } from "./theme";
+import { StatusBar } from "expo-status-bar";
 
 const width = Math.floor(Dimensions.get("window").width);
 
@@ -39,6 +41,7 @@ const View = styled.View`
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: ${BG_COLOR};
 `;
 
 const View2 = styled(View)``;
@@ -200,60 +203,62 @@ const App = () => {
       </>
     ) : isChange ? (
       <>
-        <Image source={{ uri: `${item.uri}` }} />
-        <SelectBtn
-          onPress={async () => {
-            Alert.alert("미러 사진 변경", "사진을 어디 놓을까요?", [
-              {
-                text: "취소",
-                style: "cancel",
-              },
-              {
-                text: "첫번째",
-                onPress: () => {
-                  try {
-                    setIsLoading(true);
-                    setPhotosArr((state) => [item.uri, state[1]]);
-                  } catch (error) {
-                    console.log(error);
-                  } finally {
-                    setIsLoading(false);
-                    setIsChange(false);
-                  }
-                  firestore()
-                    .collection("mirror")
-                    .doc("gallery")
-                    .set({
-                      photos: [item.uri, photosArr[1]],
-                    });
+        <ImageView>
+          <Image source={{ uri: `${item.uri}` }} />
+          <SelectBtn
+            onPress={async () => {
+              Alert.alert("미러 사진 변경", "사진을 어디 놓을까요?", [
+                {
+                  text: "취소",
+                  style: "cancel",
                 },
-              },
-              {
-                text: "두번째",
-                onPress: () => {
-                  try {
-                    setIsLoading(true);
-                    setPhotosArr((state) => [state[0], item.uri]);
-                  } catch (error) {
-                    console.log(error);
-                  } finally {
-                    setIsLoading(false);
-                    setIsChange(false);
-                  }
-                  firestore()
-                    .collection("mirror")
-                    .doc("gallery")
-                    .set({
-                      photos: [photosArr[0], item.uri],
-                    });
+                {
+                  text: "첫번째",
+                  onPress: () => {
+                    try {
+                      setIsLoading(true);
+                      setPhotosArr((state) => [item.uri, state[1]]);
+                    } catch (error) {
+                      console.log(error);
+                    } finally {
+                      setIsLoading(false);
+                      setIsChange(false);
+                    }
+                    firestore()
+                      .collection("mirror")
+                      .doc("gallery")
+                      .set({
+                        photos: [item.uri, photosArr[1]],
+                      });
+                  },
                 },
-              },
-            ]);
-            console.log(item);
-          }}
-        >
-          <Text>선택</Text>
-        </SelectBtn>
+                {
+                  text: "두번째",
+                  onPress: () => {
+                    try {
+                      setIsLoading(true);
+                      setPhotosArr((state) => [state[0], item.uri]);
+                    } catch (error) {
+                      console.log(error);
+                    } finally {
+                      setIsLoading(false);
+                      setIsChange(false);
+                    }
+                    firestore()
+                      .collection("mirror")
+                      .doc("gallery")
+                      .set({
+                        photos: [photosArr[0], item.uri],
+                      });
+                  },
+                },
+              ]);
+              console.log(item);
+            }}
+          >
+            <Text>선택</Text>
+          </SelectBtn>
+        </ImageView>
       </>
     ) : (
       <Image source={{ uri: `${item.uri}` }} />
@@ -360,6 +365,7 @@ const App = () => {
           <Text>노루를 데려오는 중</Text>
         )}
       </View2>
+      <StatusBar />
     </View>
   );
 };
