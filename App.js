@@ -43,18 +43,30 @@ const View = styled.View`
 
 const View2 = styled(View)``;
 
+const Separator = styled.View`
+  width: 30px;
+  height: 20px;
+`;
+
 const HView = styled.View`
   display: flex;
   flex-direction: row;
   width: ${`${width}px`};
   justify-content: space-evenly;
+  margin-bottom: 15px;
 `;
 
 const StorageImageView = styled.FlatList`
   flex: 1;
 `;
 
-const Text = styled.Text``;
+const Text = styled.Text`
+  color: black;
+`;
+
+const ImageView = styled.View`
+  position: relative;
+`;
 
 const Image = styled.Image`
   width: ${`${width / 3}px`};
@@ -72,6 +84,8 @@ const DeleteBtn = styled.TouchableOpacity`
   padding: 10px;
   border-radius: 5px;
 `;
+
+const PhotoName = styled(Text)``;
 
 const SelectBtn = styled.TouchableOpacity`
   position: absolute;
@@ -91,6 +105,7 @@ const App = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [image, setImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [isChange, setIsChange] = useState(false);
 
   function onResultPhoto(QuerySnapshot) {
@@ -107,71 +122,81 @@ const App = () => {
   }
 
   useEffect(() => {
-    firestore()
-      .collection("mirror")
-      .doc("gallery")
-      .onSnapshot(onResultPhoto, onError);
+    try {
+      setIsInitialLoading(true);
+      firestore()
+        .collection("mirror")
+        .doc("gallery")
+        .onSnapshot(onResultPhoto, onError);
 
-    firestore()
-      .collection("mirror")
-      .doc("schedules")
-      .onSnapshot(onResultSchedule, onError);
+      firestore()
+        .collection("mirror")
+        .doc("schedules")
+        .onSnapshot(onResultSchedule, onError);
 
-    listAll(listRef)
-      .then((res) => {
-        res.items.forEach((itemRef) => {
-          const reference = ref(storage, itemRef.fullPath);
-          getDownloadURL(reference).then((res) => {
-            setStoragePhotos((state) => [
-              ...state,
-              { uri: res, path: reference._location.path },
-            ]);
+      listAll(listRef)
+        .then((res) => {
+          res.items.forEach((itemRef) => {
+            const reference = ref(storage, itemRef.fullPath);
+            getDownloadURL(reference).then((res) => {
+              setStoragePhotos((state) => [
+                ...state,
+                { uri: res, path: reference._location.path },
+              ]);
+            });
           });
+        })
+        .catch((error) => {
+          // Uh-oh, an error occurred!
+          console.log(error);
         });
-      })
-      .catch((error) => {
-        // Uh-oh, an error occurred!
-        console.log(error);
-      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setTimeout(() => setIsInitialLoading(false), 1000);
+    }
   }, []);
 
   const renderItem = ({ item }) => {
     return isEdit ? (
       <>
-        <Image source={{ uri: `${item.uri}` }} />
-        <DeleteBtn
-          onPress={() => {
-            Alert.alert("경고", "정말 지우려구?", [
-              {
-                text: "Cancel",
-                onPress: () => console.log("Cancel Pressed"),
-                style: "cancel",
-              },
-              {
-                text: "OK",
-                onPress: () => {
-                  console.log("OK Pressed");
-                  console.log(item.path);
-                  const delRef = ref(storage, item.path);
-                  deleteObject(delRef)
-                    .then(() => {
-                      setStoragePhotos((state) =>
-                        state.filter((current) => {
-                          return current.path !== item.path;
-                        })
-                      );
-                      console.log("삭제됨");
-                    })
-                    .catch((error) => {
-                      console.log(error);
-                    });
+        <ImageView>
+          <Image source={{ uri: `${item.uri}` }} />
+          <DeleteBtn
+            onPress={() => {
+              Alert.alert("경고", "정말 지우려구?", [
+                {
+                  text: "Cancel",
+                  onPress: () => console.log("Cancel Pressed"),
+                  style: "cancel",
                 },
-              },
-            ]);
-          }}
-        >
-          <Text>삭제</Text>
-        </DeleteBtn>
+                {
+                  text: "OK",
+                  onPress: () => {
+                    console.log("OK Pressed");
+                    console.log(item.path);
+                    const delRef = ref(storage, item.path);
+                    deleteObject(delRef)
+                      .then(() => {
+                        setStoragePhotos((state) =>
+                          state.filter((current) => {
+                            return current.path !== item.path;
+                          })
+                        );
+                        console.log("삭제됨");
+                      })
+                      .catch((error) => {
+                        console.log(error);
+                      });
+                  },
+                },
+              ]);
+            }}
+          >
+            <Text>삭제</Text>
+          </DeleteBtn>
+          <PhotoName>{item.path.slice(0, 10)}...</PhotoName>
+        </ImageView>
       </>
     ) : isChange ? (
       <>
@@ -285,7 +310,11 @@ const App = () => {
     }
   };
 
-  return (
+  return isInitialLoading ? (
+    <View>
+      <Text>노루를 데려오는 중</Text>
+    </View>
+  ) : (
     <View>
       <View>
         <HView>
@@ -294,7 +323,11 @@ const App = () => {
         {photosArr === null ? (
           <Text>노루를 데려오는 중</Text>
         ) : (
-          photosArr.map((c, i) => <Image source={{ uri: `${c}` }} key={i} />)
+          <HView>
+            {photosArr.map((c, i) => (
+              <Image source={{ uri: `${c}` }} key={i} />
+            ))}
+          </HView>
         )}
       </View>
       <View2>
@@ -315,7 +348,13 @@ const App = () => {
           <StorageImageView
             data={storagePhotos}
             renderItem={renderItem}
-            horizontal={true}
+            horizontal={false}
+            numColumns={2}
+            contentContainerStyle={{
+              justifyContents: "center",
+              alignItems: "center",
+            }}
+            ItemSeparatorComponent={Separator}
           />
         ) : (
           <Text>노루를 데려오는 중</Text>
