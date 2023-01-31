@@ -154,12 +154,12 @@ const App = () => {
 
       const storagePath = fileRef._location.path;
       const result2 = await uploadBytes(fileRef, blob);
-
+      const createdTime = result2.metadata.timeCreated;
       blob.close();
       const downloadUrl = await getDownloadURL(fileRef);
       setStoragePhotos((state) => [
         ...state,
-        { uri: downloadUrl, path: storagePath },
+        { uri: downloadUrl, path: storagePath, createdAt: createdTime },
       ]);
       console.log("업로드 끝");
     } catch (error) {
