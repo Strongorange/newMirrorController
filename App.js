@@ -17,6 +17,7 @@ import { BG_COLOR } from "./theme";
 import { StatusBar } from "expo-status-bar";
 import { FFmpegKit } from "ffmpeg-kit-react-native";
 import * as RNFS from "react-native-fs";
+import * as SplashScreen from "expo-splash-screen";
 
 const width = Math.floor(Dimensions.get("window").width);
 
@@ -102,10 +103,13 @@ const SelectBtn = styled.TouchableOpacity`
 
 const AddBtn = styled.TouchableOpacity``;
 
+SplashScreen.preventAutoHideAsync();
+
 const App = () => {
   const [photosArr, setPhotosArr] = useState([]);
   const [storagePhotos, setStoragePhotos] = useState([]);
   const [schedules, setSchedules] = useState([]);
+  const [currentFbPhotosLen, setCurrentFbPhotoLen] = useState(0);
   const [isEdit, setIsEdit] = useState(false);
   const [image, setImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -178,8 +182,10 @@ const App = () => {
         .collection("mirror")
         .doc("schedules")
         .onSnapshot(onResultSchedule, onError);
+
       listAll(listRef)
         .then((res) => {
+          setCurrentFbPhotoLen(res.items.length);
           res.items.forEach((itemRef) => {
             const reference = ref(storage, itemRef.fullPath);
             getDownloadURL(reference).then((res) => {
@@ -197,9 +203,26 @@ const App = () => {
     } catch (error) {
       console.log(error);
     } finally {
-      setTimeout(() => setIsInitialLoading(false), 1000);
+      setIsInitialLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (storagePhotos.length > currentFbPhotosLen) {
+      const newArr = storagePhotos.slice(0, currentFbPhotosLen - 1);
+      setStoragePhotos(newArr);
+    }
+  }, [storagePhotos]);
+
+  useEffect(() => {
+    const hideSplash = async () => {
+      await SplashScreen.hideAsync();
+    };
+
+    if (!isInitialLoading) {
+      setTimeout(hideSplash, 1500);
+    }
+  }, [isInitialLoading]);
 
   const renderItem = ({ item }) => {
     return isEdit ? (

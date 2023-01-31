@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "419555949280",
+    "project_id": "newmirror-8ded5",
+    "storage_bucket": "newmirror-8ded5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:419555949280:android:d1b945e0f659d3b7182e85",
+        "android_client_info": {
+          "package_name": "com.strongorange.niorcontrol"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "419555949280-ra7gk6283utb1fako00hpetd2stu9q17.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3UIkaCddaeAQBJS7coPjt5HrmzDOLY4Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "419555949280-ra7gk6283utb1fako00hpetd2stu9q17.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
