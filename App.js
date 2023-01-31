@@ -208,13 +208,6 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    if (storagePhotos.length > currentFbPhotosLen) {
-      const newArr = storagePhotos.slice(0, currentFbPhotosLen - 1);
-      setStoragePhotos(newArr);
-    }
-  }, [storagePhotos]);
-
-  useEffect(() => {
     const hideSplash = async () => {
       await SplashScreen.hideAsync();
     };
