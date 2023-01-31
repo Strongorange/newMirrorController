@@ -20,3 +20,7 @@ This example demonstrates how you can upload images (and other files) to Firebas
 
 - [Firebase Storage API](https://firebase.google.com/docs/storage/web/upload-files)
 - [Expo Firebase guide](https://docs.expo.dev/versions/latest/guides/using-firebase/)
+
+# 변환
+
+FILE System 의 경로를 사용할때 앞에 file:// 이 되어있는지 확인하자!

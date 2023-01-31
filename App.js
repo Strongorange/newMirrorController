@@ -10,12 +10,13 @@ import {
   deleteObject,
   uploadBytes,
 } from "firebase/storage";
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { Dimensions, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import uuid from "uuid";
 import { BG_COLOR } from "./theme";
 import { StatusBar } from "expo-status-bar";
+import { FFmpegKit } from "ffmpeg-kit-react-native";
+import * as RNFS from "react-native-fs";
 
 const width = Math.floor(Dimensions.get("window").width);
 
@@ -124,6 +125,47 @@ const App = () => {
     console.error(error);
   }
 
+  const uploadToFirebase = async (imagePath, isVideo) => {
+    console.log(`xhr 의 imagePath = ${imagePath}`);
+    try {
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+          resolve(xhr.response);
+        };
+        xhr.onerror = function (e) {
+          console.log(e);
+          reject(new TypeError("Network request failed"));
+        };
+        xhr.responseType = "blob";
+        if (isVideo) {
+          xhr.open("GET", `file://${imagePath}`, true);
+        } else {
+          xhr.open("GET", String(imagePath), true);
+        }
+        xhr.send(null);
+      });
+
+      const fileRef = ref(storage, uuid.v4());
+
+      const storagePath = fileRef._location.path;
+      const result2 = await uploadBytes(fileRef, blob);
+
+      blob.close();
+      const downloadUrl = await getDownloadURL(fileRef);
+      setStoragePhotos((state) => [
+        ...state,
+        { uri: downloadUrl, path: storagePath },
+      ]);
+      console.log("업로드 끝");
+    } catch (error) {
+      console.log("xhr 에러");
+      console.log(error);
+    } finally {
+      setIsLoading((state) => false);
+    }
+  };
+
   useEffect(() => {
     try {
       setIsInitialLoading(true);
@@ -136,7 +178,6 @@ const App = () => {
         .collection("mirror")
         .doc("schedules")
         .onSnapshot(onResultSchedule, onError);
-
       listAll(listRef)
         .then((res) => {
           res.items.forEach((itemRef) => {
@@ -268,50 +309,28 @@ const App = () => {
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
+      allowsEditing: false,
       aspect: [1, 1],
-      quality: 1,
     });
 
     console.log(result);
 
+    //TODO: 비디오를 gif 로 처리
     if (!result.cancelled) {
-      setImage(result.uri);
-    }
-
-    setIsLoading((state) => true);
-
-    try {
-      const blob = await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.onload = function () {
-          resolve(xhr.response);
-        };
-        xhr.onerror = function (e) {
-          console.log(e);
-          reject(new TypeError("Network request failed"));
-        };
-        xhr.responseType = "blob";
-        xhr.open("GET", result.uri, true);
-        xhr.send(null);
-      });
-
-      const fileRef = ref(storage, uuid.v4());
-
-      const storagePath = fileRef._location.path;
-      const result2 = await uploadBytes(fileRef, blob);
-
-      blob.close();
-      const downloadUrl = await getDownloadURL(fileRef);
-      setStoragePhotos((state) => [
-        ...state,
-        { uri: downloadUrl, path: storagePath },
-      ]);
-      console.log("업로드 끝");
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading((state) => false);
+      if (result.type === "video") {
+        const createdGif = await FFmpegKit.execute(
+          `-i ${result.uri} -y -vf scale=160:-1 -loop 0 ${RNFS.DocumentDirectoryPath}/animation.gif`
+        );
+        const files = await RNFS.readDir(RNFS.DocumentDirectoryPath);
+        console.log(files);
+        setImage(files[0].path);
+        uploadToFirebase(files[0].path, true);
+      } else {
+        setImage(result.uri);
+        uploadToFirebase(result.uri, false);
+      }
+    } else {
+      alert("미디어 선택에서 오류 발생!");
     }
   };
 
