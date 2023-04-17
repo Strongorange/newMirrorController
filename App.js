@@ -10,7 +10,7 @@ import {
   deleteObject,
   uploadBytes,
 } from "firebase/storage";
-import { Dimensions, Alert } from "react-native";
+import { Dimensions, Alert, Button, TouchableOpacity } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import uuid from "uuid";
 import { BG_COLOR } from "./theme";
@@ -18,6 +18,8 @@ import { StatusBar } from "expo-status-bar";
 import { FFmpegKit } from "ffmpeg-kit-react-native";
 import * as RNFS from "react-native-fs";
 import * as SplashScreen from "expo-splash-screen";
+import FastImage from "react-native-fast-image";
+import Modal from "react-native-modal";
 
 const width = Math.floor(Dimensions.get("window").width);
 
@@ -115,6 +117,35 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [isChange, setIsChange] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState({});
+
+  const openModal = () => {
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+  };
+
+  const changeShowingPhoto = (index) => {
+    try {
+      setIsLoading(true);
+      const currentPhotoArr = [...photosArr];
+      currentPhotoArr[index] = selectedPhoto.uri;
+      setPhotosArr(currentPhotoArr);
+      firestore().collection("mirror").doc("gallery").set({
+        photos: currentPhotoArr,
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+      setIsChange(false);
+    }
+
+    closeModal();
+  };
 
   function onResultPhoto(QuerySnapshot) {
     // console.log(QuerySnapshot.data());
@@ -189,10 +220,22 @@ const App = () => {
           res.items.forEach((itemRef) => {
             const reference = ref(storage, itemRef.fullPath);
             getDownloadURL(reference).then((res) => {
-              setStoragePhotos((state) => [
-                ...state,
-                { uri: res, path: reference._location.path },
-              ]);
+              // 이미지 객체에 id 속성 추가
+              const newImage = {
+                uri: res,
+                path: reference._location.path,
+                id: reference._location.path,
+              };
+
+              // 이미지가 storagePhotos에 있는지 확인
+              const isImageExist = storagePhotos.some(
+                (image) => image.id === newImage.id
+              );
+
+              // 중복되지 않은 경우에만 추가
+              if (!isImageExist) {
+                setStoragePhotos((state) => [...state, newImage]);
+              }
             });
           });
         })
@@ -221,7 +264,8 @@ const App = () => {
     return isEdit ? (
       <>
         <ImageView>
-          <Image source={{ uri: `${item.uri}` }} />
+          {/* <Image source={{ uri: `${item.uri}` }} /> */}
+          <FastImage source={{ uri: `${item.uri}` }} />
           <DeleteBtn
             onPress={() => {
               Alert.alert("경고", "정말 지우려구?", [
@@ -263,54 +307,9 @@ const App = () => {
         <ImageView>
           <Image source={{ uri: `${item.uri}` }} />
           <SelectBtn
-            onPress={async () => {
-              Alert.alert("미러 사진 변경", "사진을 어디 놓을까요?", [
-                {
-                  text: "취소",
-                  style: "cancel",
-                },
-                {
-                  text: "첫번째",
-                  onPress: () => {
-                    try {
-                      setIsLoading(true);
-                      setPhotosArr((state) => [item.uri, state[1]]);
-                    } catch (error) {
-                      console.log(error);
-                    } finally {
-                      setIsLoading(false);
-                      setIsChange(false);
-                    }
-                    firestore()
-                      .collection("mirror")
-                      .doc("gallery")
-                      .set({
-                        photos: [item.uri, photosArr[1]],
-                      });
-                  },
-                },
-                {
-                  text: "두번째",
-                  onPress: () => {
-                    try {
-                      setIsLoading(true);
-                      setPhotosArr((state) => [state[0], item.uri]);
-                    } catch (error) {
-                      console.log(error);
-                    } finally {
-                      setIsLoading(false);
-                      setIsChange(false);
-                    }
-                    firestore()
-                      .collection("mirror")
-                      .doc("gallery")
-                      .set({
-                        photos: [photosArr[0], item.uri],
-                      });
-                  },
-                },
-              ]);
-              console.log(item);
+            onPress={() => {
+              setSelectedPhoto(item);
+              openModal();
             }}
           >
             <Text>선택</Text>
@@ -326,21 +325,32 @@ const App = () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: false,
-      aspect: [1, 1],
+      quality: 0,
     });
 
+    console.log("선택된 미디어 \n");
     console.log(result);
 
     //TODO: 비디오를 gif 로 처리
     if (!result.cancelled) {
       if (result.type === "video") {
+        console.log("비디오 선택됨");
         const createdGif = await FFmpegKit.execute(
           `-i ${result.uri} -y -vf scale=160:-1 -loop 0 ${RNFS.DocumentDirectoryPath}/animation.gif`
         );
         const files = await RNFS.readDir(RNFS.DocumentDirectoryPath);
+        console.log("파일 목록 \n");
         console.log(files);
-        setImage(files[0].path);
-        uploadToFirebase(files[0].path, true);
+
+        const animationGifIndex = files.findIndex(
+          (file) => file.name === "animation.gif"
+        );
+        if (animationGifIndex !== -1) {
+          setImage(files[animationGifIndex].path);
+          uploadToFirebase(files[animationGifIndex].path, true);
+        } else {
+          console.error("animation.gif 파일을 찾을 수 없습니다.");
+        }
       } else {
         setImage(result.uri);
         uploadToFirebase(result.uri, false);
@@ -386,6 +396,7 @@ const App = () => {
 
         {!isLoading && storagePhotos.length > 0 ? (
           <StorageImageView
+            keyExtractor={(item) => item.path}
             data={storagePhotos}
             renderItem={renderItem}
             horizontal={false}
@@ -401,6 +412,20 @@ const App = () => {
         )}
       </View2>
       <StatusBar />
+      <Modal isVisible={modalVisible}>
+        <View>
+          <HView>
+            <Text>사진을 어디에 놓을까요?</Text>
+            <TouchableOpacity onPress={closeModal}>
+              <Text>X</Text>
+            </TouchableOpacity>
+          </HView>
+          <Button title="첫번째" onPress={() => changeShowingPhoto(0)} />
+          <Button title="두번째" onPress={() => changeShowingPhoto(1)} />
+          <Button title="세번째" onPress={() => changeShowingPhoto(2)} />
+          <Button title="네번째" onPress={() => changeShowingPhoto(3)} />
+        </View>
+      </Modal>
     </View>
   );
 };
