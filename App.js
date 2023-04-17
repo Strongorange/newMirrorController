@@ -18,6 +18,7 @@ import { StatusBar } from "expo-status-bar";
 import { FFmpegKit } from "ffmpeg-kit-react-native";
 import * as RNFS from "react-native-fs";
 import * as SplashScreen from "expo-splash-screen";
+import FastImage from "react-native-fast-image";
 
 const width = Math.floor(Dimensions.get("window").width);
 
@@ -233,7 +234,8 @@ const App = () => {
     return isEdit ? (
       <>
         <ImageView>
-          <Image source={{ uri: `${item.uri}` }} />
+          {/* <Image source={{ uri: `${item.uri}` }} /> */}
+          <FastImage source={{ uri: `${item.uri}` }} />
           <DeleteBtn
             onPress={() => {
               Alert.alert("경고", "정말 지우려구?", [
@@ -338,7 +340,7 @@ const App = () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: false,
-      aspect: [1, 1],
+      quality: 0,
     });
 
     console.log("선택된 미디어 \n");
@@ -409,6 +411,7 @@ const App = () => {
 
         {!isLoading && storagePhotos.length > 0 ? (
           <StorageImageView
+            keyExtractor={(item) => item.path}
             data={storagePhotos}
             renderItem={renderItem}
             horizontal={false}
