@@ -10,7 +10,7 @@ import {
   deleteObject,
   uploadBytes,
 } from "firebase/storage";
-import { Dimensions, Alert } from "react-native";
+import { Dimensions, Alert, Button, TouchableOpacity } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import uuid from "uuid";
 import { BG_COLOR } from "./theme";
@@ -19,6 +19,7 @@ import { FFmpegKit } from "ffmpeg-kit-react-native";
 import * as RNFS from "react-native-fs";
 import * as SplashScreen from "expo-splash-screen";
 import FastImage from "react-native-fast-image";
+import Modal from "react-native-modal";
 
 const width = Math.floor(Dimensions.get("window").width);
 
@@ -116,6 +117,35 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [isChange, setIsChange] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState({});
+
+  const openModal = () => {
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+  };
+
+  const changeShowingPhoto = (index) => {
+    try {
+      setIsLoading(true);
+      const currentPhotoArr = [...photosArr];
+      currentPhotoArr[index] = selectedPhoto.uri;
+      setPhotosArr(currentPhotoArr);
+      firestore().collection("mirror").doc("gallery").set({
+        photos: currentPhotoArr,
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+      setIsChange(false);
+    }
+
+    closeModal();
+  };
 
   function onResultPhoto(QuerySnapshot) {
     // console.log(QuerySnapshot.data());
@@ -277,54 +307,9 @@ const App = () => {
         <ImageView>
           <Image source={{ uri: `${item.uri}` }} />
           <SelectBtn
-            onPress={async () => {
-              Alert.alert("미러 사진 변경", "사진을 어디 놓을까요?", [
-                {
-                  text: "취소",
-                  style: "cancel",
-                },
-                {
-                  text: "첫번째",
-                  onPress: () => {
-                    try {
-                      setIsLoading(true);
-                      setPhotosArr((state) => [item.uri, state[1]]);
-                    } catch (error) {
-                      console.log(error);
-                    } finally {
-                      setIsLoading(false);
-                      setIsChange(false);
-                    }
-                    firestore()
-                      .collection("mirror")
-                      .doc("gallery")
-                      .set({
-                        photos: [item.uri, photosArr[1]],
-                      });
-                  },
-                },
-                {
-                  text: "두번째",
-                  onPress: () => {
-                    try {
-                      setIsLoading(true);
-                      setPhotosArr((state) => [state[0], item.uri]);
-                    } catch (error) {
-                      console.log(error);
-                    } finally {
-                      setIsLoading(false);
-                      setIsChange(false);
-                    }
-                    firestore()
-                      .collection("mirror")
-                      .doc("gallery")
-                      .set({
-                        photos: [photosArr[0], item.uri],
-                      });
-                  },
-                },
-              ]);
-              console.log(item);
+            onPress={() => {
+              setSelectedPhoto(item);
+              openModal();
             }}
           >
             <Text>선택</Text>
@@ -427,6 +412,20 @@ const App = () => {
         )}
       </View2>
       <StatusBar />
+      <Modal isVisible={modalVisible}>
+        <View>
+          <HView>
+            <Text>사진을 어디에 놓을까요?</Text>
+            <TouchableOpacity onPress={closeModal}>
+              <Text>X</Text>
+            </TouchableOpacity>
+          </HView>
+          <Button title="첫번째" onPress={() => changeShowingPhoto(0)} />
+          <Button title="두번째" onPress={() => changeShowingPhoto(1)} />
+          <Button title="세번째" onPress={() => changeShowingPhoto(2)} />
+          <Button title="네번째" onPress={() => changeShowingPhoto(3)} />
+        </View>
+      </Modal>
     </View>
   );
 };
