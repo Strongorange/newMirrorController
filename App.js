@@ -18,6 +18,7 @@ import { StatusBar } from "expo-status-bar";
 import { FFmpegKit } from "ffmpeg-kit-react-native";
 import * as RNFS from "react-native-fs";
 import * as SplashScreen from "expo-splash-screen";
+import FastImage from "react-native-fast-image";
 
 const width = Math.floor(Dimensions.get("window").width);
 
@@ -189,10 +190,22 @@ const App = () => {
           res.items.forEach((itemRef) => {
             const reference = ref(storage, itemRef.fullPath);
             getDownloadURL(reference).then((res) => {
-              setStoragePhotos((state) => [
-                ...state,
-                { uri: res, path: reference._location.path },
-              ]);
+              // 이미지 객체에 id 속성 추가
+              const newImage = {
+                uri: res,
+                path: reference._location.path,
+                id: reference._location.path,
+              };
+
+              // 이미지가 storagePhotos에 있는지 확인
+              const isImageExist = storagePhotos.some(
+                (image) => image.id === newImage.id
+              );
+
+              // 중복되지 않은 경우에만 추가
+              if (!isImageExist) {
+                setStoragePhotos((state) => [...state, newImage]);
+              }
             });
           });
         })
@@ -221,7 +234,8 @@ const App = () => {
     return isEdit ? (
       <>
         <ImageView>
-          <Image source={{ uri: `${item.uri}` }} />
+          {/* <Image source={{ uri: `${item.uri}` }} /> */}
+          <FastImage source={{ uri: `${item.uri}` }} />
           <DeleteBtn
             onPress={() => {
               Alert.alert("경고", "정말 지우려구?", [
@@ -326,21 +340,32 @@ const App = () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: false,
-      aspect: [1, 1],
+      quality: 0,
     });
 
+    console.log("선택된 미디어 \n");
     console.log(result);
 
     //TODO: 비디오를 gif 로 처리
     if (!result.cancelled) {
       if (result.type === "video") {
+        console.log("비디오 선택됨");
         const createdGif = await FFmpegKit.execute(
           `-i ${result.uri} -y -vf scale=160:-1 -loop 0 ${RNFS.DocumentDirectoryPath}/animation.gif`
         );
         const files = await RNFS.readDir(RNFS.DocumentDirectoryPath);
+        console.log("파일 목록 \n");
         console.log(files);
-        setImage(files[0].path);
-        uploadToFirebase(files[0].path, true);
+
+        const animationGifIndex = files.findIndex(
+          (file) => file.name === "animation.gif"
+        );
+        if (animationGifIndex !== -1) {
+          setImage(files[animationGifIndex].path);
+          uploadToFirebase(files[animationGifIndex].path, true);
+        } else {
+          console.error("animation.gif 파일을 찾을 수 없습니다.");
+        }
       } else {
         setImage(result.uri);
         uploadToFirebase(result.uri, false);
@@ -386,6 +411,7 @@ const App = () => {
 
         {!isLoading && storagePhotos.length > 0 ? (
           <StorageImageView
+            keyExtractor={(item) => item.path}
             data={storagePhotos}
             renderItem={renderItem}
             horizontal={false}
