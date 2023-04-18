@@ -22,7 +22,8 @@
     "uuid": "3.4.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.9"
+    "@babel/core": "^7.12.9",
+    "@types/styled-components-react-native": "^5.2.1"
   },
   "scripts": {
     "start": "expo start --dev-client",
