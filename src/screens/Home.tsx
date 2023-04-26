@@ -13,112 +13,53 @@ import {
 import { Dimensions, Alert, Button, TouchableOpacity } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import uuid from "uuid";
-import { BG_COLOR } from "./theme";
+import { BG_COLOR } from "../../theme";
 import { StatusBar } from "expo-status-bar";
 import { FFmpegKit } from "ffmpeg-kit-react-native";
 import * as RNFS from "react-native-fs";
 import * as SplashScreen from "expo-splash-screen";
 import FastImage from "react-native-fast-image";
 import Modal from "react-native-modal";
-
-const width = Math.floor(Dimensions.get("window").width);
+import {
+  FB_API_KEY,
+  FB_APP_ID,
+  FB_AUTH_DOMAIN,
+  FB_MESSAGING_SENDER_ID,
+  FB_PROJECT_ID,
+  FB_STORAGE_BUCKET,
+} from "@env";
+import * as S from "../styles/home.style";
+import CurrentPhotos from "../components/home/CurrentPhotos";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCxu1lGHVqTi9YrrFdMnaw3iHdGQX0Xq_c",
-  authDomain: "newmirror-8ded5.firebaseapp.com",
-  projectId: "newmirror-8ded5",
-  storageBucket: "newmirror-8ded5.appspot.com",
-  messagingSenderId: "419555949280",
-  appId: "1:419555949280:web:f6580146b25e0816182e85",
+  apiKey: FB_API_KEY,
+  authDomain: FB_AUTH_DOMAIN,
+  projectId: FB_PROJECT_ID,
+  storageBucket: FB_STORAGE_BUCKET,
+  messagingSenderId: FB_MESSAGING_SENDER_ID,
+  appId: FB_APP_ID,
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+initializeApp(firebaseConfig);
 
 const storage = getStorage();
 
 const listRef = ref(storage, "/");
 
-const View = styled.View`
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: ${BG_COLOR};
-`;
-
-const View2 = styled(View)``;
-
-const Separator = styled.View`
-  width: 30px;
-  height: 20px;
-`;
-
-const HView = styled.View`
-  display: flex;
-  flex-direction: row;
-  width: ${`${width}px`};
-  justify-content: space-evenly;
-  margin-bottom: 15px;
-`;
-
-const StorageImageView = styled.FlatList`
-  flex: 1;
-`;
-
-const Text = styled.Text`
-  color: black;
-`;
-
-const ImageView = styled.View`
-  position: relative;
-`;
-
-const Image = styled.Image`
-  width: ${`${width / 3}px`};
-  height: ${`${width / 3}px`};
-  position: relative;
-`;
-
-const EditBtn = styled.TouchableOpacity``;
-
-const DeleteBtn = styled.TouchableOpacity`
-  position: absolute;
-  top: 0;
-  right: 0;
-  background-color: red;
-  padding: 10px;
-  border-radius: 5px;
-`;
-
-const PhotoName = styled(Text)``;
-
-const SelectBtn = styled.TouchableOpacity`
-  position: absolute;
-  top: 0;
-  right: 0;
-  background-color: green;
-  padding: 10px;
-  border-radius: 5px;
-`;
-
-const AddBtn = styled.TouchableOpacity``;
-
-SplashScreen.preventAutoHideAsync();
-
-const App = () => {
-  const [photosArr, setPhotosArr] = useState([]);
-  const [storagePhotos, setStoragePhotos] = useState([]);
+const Home = () => {
+  const [photosArr, setPhotosArr] = useState<any[]>([]);
+  const [storagePhotos, setStoragePhotos] = useState<any[]>([]);
   const [schedules, setSchedules] = useState([]);
   const [currentFbPhotosLen, setCurrentFbPhotoLen] = useState(0);
   const [isEdit, setIsEdit] = useState(false);
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [isChange, setIsChange] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState({});
+  const [selectedPhoto, setSelectedPhoto] = useState<any>({});
 
   const openModal = () => {
     setModalVisible(true);
@@ -128,10 +69,10 @@ const App = () => {
     setModalVisible(false);
   };
 
-  const changeShowingPhoto = (index) => {
+  const changeShowingPhoto = (index: number) => {
     try {
       setIsLoading(true);
-      const currentPhotoArr = [...photosArr];
+      const currentPhotoArr: any[] = [...photosArr];
       currentPhotoArr[index] = selectedPhoto.uri;
       setPhotosArr(currentPhotoArr);
       firestore().collection("mirror").doc("gallery").set({
@@ -147,23 +88,23 @@ const App = () => {
     closeModal();
   };
 
-  function onResultPhoto(QuerySnapshot) {
+  function onResultPhoto(QuerySnapshot: any) {
     // console.log(QuerySnapshot.data());
     setPhotosArr(QuerySnapshot.data().photos);
   }
 
-  function onResultSchedule(QuerySnapshot) {
+  function onResultSchedule(QuerySnapshot: any) {
     //console.log(QuerySnapshot._data);
   }
 
-  function onError(error) {
+  function onError(error: any) {
     console.error(error);
   }
 
-  const uploadToFirebase = async (imagePath, isVideo) => {
+  const uploadToFirebase = async (imagePath: string, isVideo: boolean) => {
     console.log(`xhr 의 imagePath = ${imagePath}`);
     try {
-      const blob = await new Promise((resolve, reject) => {
+      const blob: Blob = await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.onload = function () {
           resolve(xhr.response);
@@ -181,12 +122,11 @@ const App = () => {
         xhr.send(null);
       });
 
-      const fileRef = ref(storage, uuid.v4());
+      const fileRef: any = ref(storage, uuid.v4());
 
       const storagePath = fileRef._location.path;
       const result2 = await uploadBytes(fileRef, blob);
       const createdTime = result2.metadata.timeCreated;
-      blob.close();
       const downloadUrl = await getDownloadURL(fileRef);
       setStoragePhotos((state) => [
         ...state,
@@ -218,7 +158,7 @@ const App = () => {
         .then((res) => {
           setCurrentFbPhotoLen(res.items.length);
           res.items.forEach((itemRef) => {
-            const reference = ref(storage, itemRef.fullPath);
+            const reference: any = ref(storage, itemRef.fullPath);
             getDownloadURL(reference).then((res) => {
               // 이미지 객체에 id 속성 추가
               const newImage = {
@@ -260,13 +200,13 @@ const App = () => {
     }
   }, [isInitialLoading]);
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({ item }: any) => {
     return isEdit ? (
       <>
-        <ImageView>
+        <S.ImageView>
           {/* <Image source={{ uri: `${item.uri}` }} /> */}
           <FastImage source={{ uri: `${item.uri}` }} />
-          <DeleteBtn
+          <S.DeleteBtn
             onPress={() => {
               Alert.alert("경고", "정말 지우려구?", [
                 {
@@ -297,27 +237,27 @@ const App = () => {
               ]);
             }}
           >
-            <Text>삭제</Text>
-          </DeleteBtn>
-          <PhotoName>{item.path.slice(0, 10)}...</PhotoName>
-        </ImageView>
+            <S.Text>삭제</S.Text>
+          </S.DeleteBtn>
+          <S.PhotoName>{item.path.slice(0, 10)}...</S.PhotoName>
+        </S.ImageView>
       </>
     ) : isChange ? (
       <>
-        <ImageView>
-          <Image source={{ uri: `${item.uri}` }} />
-          <SelectBtn
+        <S.ImageView>
+          <S.Image source={{ uri: `${item.uri}` }} />
+          <S.SelectBtn
             onPress={() => {
               setSelectedPhoto(item);
               openModal();
             }}
           >
-            <Text>선택</Text>
-          </SelectBtn>
-        </ImageView>
+            <S.Text>선택</S.Text>
+          </S.SelectBtn>
+        </S.ImageView>
       </>
     ) : (
-      <Image source={{ uri: `${item.uri}` }} />
+      <S.Image source={{ uri: `${item.uri}` }} />
     );
   };
 
@@ -331,7 +271,9 @@ const App = () => {
     console.log("선택된 미디어 \n");
     console.log(result);
 
-    //TODO: 비디오를 gif 로 처리
+    /**
+     * @description 비디오를 gif로 변환
+     */
     if (!result.cancelled) {
       if (result.type === "video") {
         console.log("비디오 선택됨");
@@ -356,78 +298,77 @@ const App = () => {
         uploadToFirebase(result.uri, false);
       }
     } else {
-      alert("미디어 선택에서 오류 발생!");
+      console.log("취소됨");
     }
   };
 
   return isInitialLoading ? (
-    <View>
-      <Text>노루를 데려오는 중</Text>
-    </View>
+    <S.HomeLayout>
+      <S.Text>노루를 데려오는 중</S.Text>
+    </S.HomeLayout>
   ) : (
-    <View>
-      <View>
-        <HView>
-          <Text>현재</Text>
-        </HView>
+    <S.HomeLayout>
+      <S.CurrentPhotoContainer>
+        <CurrentPhotos />
+        <S.Text>현재</S.Text>
         {photosArr === null ? (
-          <Text>노루를 데려오는 중</Text>
+          <S.Text>노루를 데려오는 중</S.Text>
         ) : (
-          <HView>
+          <S.HView>
             {photosArr.map((c, i) => (
-              <Image source={{ uri: `${c}` }} key={i} />
+              <S.Image source={{ uri: `${c}` }} key={i} />
             ))}
-          </HView>
+          </S.HView>
         )}
-      </View>
-      <View2>
-        <HView>
-          <Text>저장된 사진 ({storagePhotos.length})</Text>
-          <EditBtn onPress={() => setIsEdit((state) => !state)}>
-            <Text>수정</Text>
-          </EditBtn>
-          <EditBtn onPress={() => setIsChange((state) => !state)}>
-            <Text>현재 사진 변경 </Text>
-          </EditBtn>
-          <AddBtn onPress={() => pickImage()}>
-            <Text>사진추가</Text>
-          </AddBtn>
-        </HView>
+      </S.CurrentPhotoContainer>
+      <S.View2>
+        <S.HView>
+          <S.Text>저장된 사진 ({storagePhotos.length})</S.Text>
+          <S.EditBtn onPress={() => setIsEdit((state) => !state)}>
+            <S.Text>수정</S.Text>
+          </S.EditBtn>
+          <S.EditBtn onPress={() => setIsChange((state) => !state)}>
+            <S.Text>현재 사진 변경 </S.Text>
+          </S.EditBtn>
+          <S.AddBtn onPress={() => pickImage()}>
+            <S.Text>사진추가</S.Text>
+          </S.AddBtn>
+        </S.HView>
 
         {!isLoading && storagePhotos.length > 0 ? (
-          <StorageImageView
-            keyExtractor={(item) => item.path}
+          <S.StorageImageView
+            keyExtractor={(item: any) => item.path}
             data={storagePhotos}
             renderItem={renderItem}
             horizontal={false}
-            numColumns={2}
+            numColumns={3}
             contentContainerStyle={{
-              justifyContents: "center",
+              justifyContent: "center",
               alignItems: "center",
             }}
-            ItemSeparatorComponent={Separator}
+            ItemSeparatorComponent={S.Separator}
           />
         ) : (
-          <Text>노루를 데려오는 중</Text>
+          <S.Text>노루를 데려오는 중</S.Text>
         )}
-      </View2>
+      </S.View2>
       <StatusBar />
       <Modal isVisible={modalVisible}>
-        <View>
-          <HView>
-            <Text>사진을 어디에 놓을까요?</Text>
+        <S.View>
+          <S.HView>
+            <S.Text>사진을 어디에 놓을까요?</S.Text>
             <TouchableOpacity onPress={closeModal}>
-              <Text>X</Text>
+              <S.Text>X</S.Text>
             </TouchableOpacity>
-          </HView>
+          </S.HView>
           <Button title="첫번째" onPress={() => changeShowingPhoto(0)} />
           <Button title="두번째" onPress={() => changeShowingPhoto(1)} />
           <Button title="세번째" onPress={() => changeShowingPhoto(2)} />
           <Button title="네번째" onPress={() => changeShowingPhoto(3)} />
-        </View>
+        </S.View>
       </Modal>
-    </View>
+    </S.HomeLayout>
   );
 };
 
-export default App;
+export default Home;
