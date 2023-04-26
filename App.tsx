@@ -8,6 +8,7 @@ import ReactNativeRecoilPersist, {
 } from "react-native-recoil-persist";
 import theme from "./src/styles/theme";
 import { ThemeProvider } from "styled-components/native";
+import { StatusBar } from "expo-status-bar";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,6 +26,7 @@ const App = () => {
         <ThemeProvider theme={theme}>
           <NavigationContainer>
             <RootNavigation />
+            <StatusBar style="dark" />
           </NavigationContainer>
         </ThemeProvider>
       </ReactNativeRecoilPersistGate>

@@ -1,4 +1,3 @@
-import styled from "styled-components/native";
 import React, { useState, useEffect } from "react";
 import firestore from "@react-native-firebase/firestore";
 import { initializeApp } from "firebase/app";
@@ -10,11 +9,9 @@ import {
   deleteObject,
   uploadBytes,
 } from "firebase/storage";
-import { Dimensions, Alert, Button, TouchableOpacity } from "react-native";
+import { Alert, Button, TouchableOpacity, View, Text } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import uuid from "uuid";
-import { BG_COLOR } from "../../theme";
-import { StatusBar } from "expo-status-bar";
 import { FFmpegKit } from "ffmpeg-kit-react-native";
 import * as RNFS from "react-native-fs";
 import * as SplashScreen from "expo-splash-screen";
@@ -32,6 +29,8 @@ import * as S from "../styles/home.style";
 import CurrentPhotos from "../components/home/CurrentPhotos";
 import { useRecoilState } from "recoil";
 import { showingPhotosState } from "../states/showingPhotosState";
+import FireStorePhotos from "../components/home/FireStorePhotos";
+import { StoragePhoto, storagePhotosState } from "../states/storagePhotosState";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -53,6 +52,8 @@ const listRef = ref(storage, "/");
 const Home = () => {
   const [showingPhotosAtom, setShowingPhotosAtom] =
     useRecoilState(showingPhotosState);
+  const [storagePhotosAtom, setStoragePhotosAtom] =
+    useRecoilState(storagePhotosState);
   const [photosArr, setPhotosArr] = useState<any[]>([]);
   const [storagePhotos, setStoragePhotos] = useState<any[]>([]);
   const [schedules, setSchedules] = useState([]);
@@ -132,7 +133,12 @@ const Home = () => {
       const result2 = await uploadBytes(fileRef, blob);
       const createdTime = result2.metadata.timeCreated;
       const downloadUrl = await getDownloadURL(fileRef);
+
       setStoragePhotos((state) => [
+        ...state,
+        { uri: downloadUrl, path: storagePath, createdAt: createdTime },
+      ]);
+      setStoragePhotosAtom((state) => [
         ...state,
         { uri: downloadUrl, path: storagePath, createdAt: createdTime },
       ]);
@@ -146,6 +152,23 @@ const Home = () => {
   };
 
   useEffect(() => {
+    const getStoragePhotos = async () => {
+      const storageRes = await listAll(listRef);
+      const storagePhotos: StoragePhoto[] = [];
+
+      for (const itemRef of storageRes.items) {
+        const reference: any = ref(storage, itemRef.fullPath);
+        const downloadUrl = await getDownloadURL(reference);
+        const newImage = {
+          uri: downloadUrl,
+          path: reference._location.path,
+          id: reference._location.path,
+        };
+        storagePhotos.push(newImage);
+      }
+
+      setStoragePhotosAtom(storagePhotos);
+    };
     try {
       setIsInitialLoading(true);
       firestore()
@@ -158,35 +181,7 @@ const Home = () => {
         .doc("schedules")
         .onSnapshot(onResultSchedule, onError);
 
-      listAll(listRef)
-        .then((res) => {
-          setCurrentFbPhotoLen(res.items.length);
-          res.items.forEach((itemRef) => {
-            const reference: any = ref(storage, itemRef.fullPath);
-            getDownloadURL(reference).then((res) => {
-              // 이미지 객체에 id 속성 추가
-              const newImage = {
-                uri: res,
-                path: reference._location.path,
-                id: reference._location.path,
-              };
-
-              // 이미지가 storagePhotos에 있는지 확인
-              const isImageExist = storagePhotos.some(
-                (image) => image.id === newImage.id
-              );
-
-              // 중복되지 않은 경우에만 추가
-              if (!isImageExist) {
-                setStoragePhotos((state) => [...state, newImage]);
-              }
-            });
-          });
-        })
-        .catch((error) => {
-          // Uh-oh, an error occurred!
-          console.log(error);
-        });
+      getStoragePhotos();
     } catch (error) {
       console.log(error);
     } finally {
@@ -227,6 +222,11 @@ const Home = () => {
                     deleteObject(delRef)
                       .then(() => {
                         setStoragePhotos((state) =>
+                          state.filter((current) => {
+                            return current.path !== item.path;
+                          })
+                        );
+                        setStoragePhotosAtom((state) =>
                           state.filter((current) => {
                             return current.path !== item.path;
                           })
@@ -312,11 +312,9 @@ const Home = () => {
     </S.HomeLayout>
   ) : (
     <S.HomeLayout>
-      <S.CurrentPhotoContainer>
-        <CurrentPhotos />
-        <S.Text>현재</S.Text>
-      </S.CurrentPhotoContainer>
-      <S.View2>
+      <CurrentPhotos />
+      <FireStorePhotos />
+      {/* <S.View2>
         <S.HView>
           <S.Text>저장된 사진 ({storagePhotos.length})</S.Text>
           <S.EditBtn onPress={() => setIsEdit((state) => !state)}>
@@ -346,8 +344,8 @@ const Home = () => {
         ) : (
           <S.Text>노루를 데려오는 중</S.Text>
         )}
-      </S.View2>
-      <StatusBar />
+      </S.View2> */}
+
       <Modal isVisible={modalVisible}>
         <S.View>
           <S.HView>

@@ -4,6 +4,7 @@ import styled from "styled-components/native";
 const width = Math.floor(Dimensions.get("window").width);
 
 export const CurrentPhotoContainer = styled.View`
+  flex: 1;
   background-color: ${({ theme }) => theme.colors.MAIN};
 `;
 

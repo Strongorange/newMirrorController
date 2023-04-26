@@ -4,7 +4,7 @@ import { showingPhotosState } from "../../states/showingPhotosState";
 import * as S from "../../styles/home/CurrentPhotos.style";
 
 const CurrentPhotos = () => {
-  const [showingPhoto, setShowingPhoto] = useRecoilState(showingPhotosState);
+  const [showingPhoto] = useRecoilState(showingPhotosState);
 
   return (
     <S.CurrentPhotoContainer>
