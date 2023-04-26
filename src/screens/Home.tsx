@@ -30,6 +30,8 @@ import {
 } from "@env";
 import * as S from "../styles/home.style";
 import CurrentPhotos from "../components/home/CurrentPhotos";
+import { useRecoilState } from "recoil";
+import { showingPhotosState } from "../states/showingPhotosState";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -49,6 +51,8 @@ const storage = getStorage();
 const listRef = ref(storage, "/");
 
 const Home = () => {
+  const [showingPhotosAtom, setShowingPhotosAtom] =
+    useRecoilState(showingPhotosState);
   const [photosArr, setPhotosArr] = useState<any[]>([]);
   const [storagePhotos, setStoragePhotos] = useState<any[]>([]);
   const [schedules, setSchedules] = useState([]);
@@ -75,6 +79,7 @@ const Home = () => {
       const currentPhotoArr: any[] = [...photosArr];
       currentPhotoArr[index] = selectedPhoto.uri;
       setPhotosArr(currentPhotoArr);
+      setShowingPhotosAtom(currentPhotoArr);
       firestore().collection("mirror").doc("gallery").set({
         photos: currentPhotoArr,
       });
@@ -89,8 +94,7 @@ const Home = () => {
   };
 
   function onResultPhoto(QuerySnapshot: any) {
-    // console.log(QuerySnapshot.data());
-    setPhotosArr(QuerySnapshot.data().photos);
+    setShowingPhotosAtom(QuerySnapshot.data().photos);
   }
 
   function onResultSchedule(QuerySnapshot: any) {
@@ -311,15 +315,6 @@ const Home = () => {
       <S.CurrentPhotoContainer>
         <CurrentPhotos />
         <S.Text>현재</S.Text>
-        {photosArr === null ? (
-          <S.Text>노루를 데려오는 중</S.Text>
-        ) : (
-          <S.HView>
-            {photosArr.map((c, i) => (
-              <S.Image source={{ uri: `${c}` }} key={i} />
-            ))}
-          </S.HView>
-        )}
       </S.CurrentPhotoContainer>
       <S.View2>
         <S.HView>
