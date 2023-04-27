@@ -1,8 +1,8 @@
-import { Dimensions } from "react-native";
 import styled from "styled-components/native";
 import { BG_COLOR } from "../../theme";
+import { getDeviceSize } from "../utils/getDeviceSize";
 
-const width = Math.floor(Dimensions.get("window").width);
+const { width } = getDeviceSize();
 
 export const HomeLayout = styled.View`
   flex: 1;
