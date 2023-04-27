@@ -1,12 +1,9 @@
-import { View, Text, Pressable } from "react-native";
 import React, { useCallback } from "react";
 import * as S from "../../styles/home/FirestorePhotosControls.style";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { storagePhotosControlState } from "../../states/storagePhotosControlState";
 import { storagePhotosCountSelctor } from "../../states/storagePhotosState";
 import { Button } from "react-native-paper";
-import { Modal, Portal } from "react-native-paper";
-import SwitchPhoto from "../modals/SwitchPhoto";
 
 const FireStorePhotoControls = () => {
   const [storagePhotosControl, setStoragePhotosControl] = useRecoilState(

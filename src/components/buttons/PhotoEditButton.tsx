@@ -1,9 +1,8 @@
 import React from "react";
-import { useRecoilValue } from "recoil";
 import { useModal } from "../../hooks/useModal";
-import { storagePhotosControlState } from "../../states/storagePhotosControlState";
 import { StoragePhoto } from "../../states/storagePhotosState";
 import * as S from "../../styles/buttons/PhotoEditButton.style";
+import SwitchPhotoModalContent from "../home/SwitchPhotoModalContent";
 
 type PhotoEditButtonProps = {
   variant: "delete" | "change";
@@ -28,7 +27,9 @@ const PhotoEditButton = ({
     <S.PhotoEditButton
       compact={compact}
       buttonColor={buttonColor}
-      onPress={() => openModal({ content: <S.Text>HELLO</S.Text> })}
+      onPress={() =>
+        openModal({ content: <SwitchPhotoModalContent item={item} /> })
+      }
     >
       <S.Text>{textContent}</S.Text>
     </S.PhotoEditButton>

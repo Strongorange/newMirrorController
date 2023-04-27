@@ -5,6 +5,7 @@ interface StoragePhotosControlState {
   isChangingMode: boolean;
   isModalVisible: boolean;
   modalContent?: JSX.Element | string;
+  isPhotoLoading: boolean;
 }
 
 export const storagePhotosControlState = atom<StoragePhotosControlState>({
@@ -13,5 +14,6 @@ export const storagePhotosControlState = atom<StoragePhotosControlState>({
     isDeletingMode: false,
     isChangingMode: false,
     isModalVisible: false,
+    isPhotoLoading: false,
   },
 });
