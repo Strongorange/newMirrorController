@@ -29,5 +29,12 @@ export const useModal = () => {
     [setStoragePhotosControl]
   );
 
-  return { storagePhotosControl, closeModal, openModal };
+  const changeModalContent = useCallback(({ content }: OpenModalProps) => {
+    setStoragePhotosControl((prev) => ({
+      ...prev,
+      modalContent: content,
+    }));
+  }, []);
+
+  return { storagePhotosControl, closeModal, openModal, changeModalContent };
 };

@@ -10,6 +10,10 @@ import * as RNFS from "react-native-fs";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { uuidv4 } from "@firebase/util";
 import { storagePhotosState } from "../../states/storagePhotosState";
+import { Alert } from "react-native";
+import { useModal } from "../../hooks/useModal";
+import LoadingModal from "../modals/LoadingModal";
+import FinishModal from "../modals/FinishModal";
 
 const FireStorePhotoControls = () => {
   const [storagePhotosControl, setStoragePhotosControl] = useRecoilState(
@@ -18,6 +22,7 @@ const FireStorePhotoControls = () => {
   const setStoragePhotos = useSetRecoilState(storagePhotosState);
   // Recoil Selctor를 사용해 받은 현재 fb의 사진 길이
   const storagePhotosLength = useRecoilValue(storagePhotosCountSelctor);
+  const { openModal, changeModalContent } = useModal();
 
   const toggleChangingMode = useCallback(() => {
     setStoragePhotosControl((prev) => ({
@@ -87,11 +92,14 @@ const FireStorePhotoControls = () => {
   );
 
   const addPhoto = useCallback(async () => {
+    if (storagePhotosControl.isPhotoLoading) return;
     setStoragePhotosControl((prev) => ({
       ...prev,
       isChangingMode: false,
       isDeletingMode: false,
+      isPhotoLoading: true,
     }));
+    openModal({ content: <LoadingModal /> });
 
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
@@ -114,13 +122,20 @@ const FireStorePhotoControls = () => {
           (file) => file.name === "animation.gif"
         );
         if (animationGifIndex !== -1) {
-          uploadToFirebase(files[animationGifIndex].path, true);
+          await uploadToFirebase(files[animationGifIndex].path, true);
         } else {
           console.error("animation.gif 파일을 찾을 수 없습니다.");
         }
       } else {
-        uploadToFirebase(result.uri, false);
+        await uploadToFirebase(result.uri, false);
       }
+      changeModalContent({ content: <FinishModal /> });
+      setStoragePhotosControl((prev) => ({
+        ...prev,
+        isPhotoLoading: false,
+      }));
+    } else {
+      console.log("취소");
     }
   }, []);
 
