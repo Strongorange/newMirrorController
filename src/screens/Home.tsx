@@ -31,6 +31,7 @@ import { useRecoilState } from "recoil";
 import { showingPhotosState } from "../states/showingPhotosState";
 import FireStorePhotos from "../components/home/FireStorePhotos";
 import { StoragePhoto, storagePhotosState } from "../states/storagePhotosState";
+import FireStorePhotoControls from "../components/home/FireStorePhotoControls";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -313,6 +314,7 @@ const Home = () => {
   ) : (
     <S.HomeLayout>
       <CurrentPhotos />
+      <FireStorePhotoControls />
       <FireStorePhotos />
       {/* <S.View2>
         <S.HView>
@@ -345,21 +347,6 @@ const Home = () => {
           <S.Text>노루를 데려오는 중</S.Text>
         )}
       </S.View2> */}
-
-      <Modal isVisible={modalVisible}>
-        <S.View>
-          <S.HView>
-            <S.Text>사진을 어디에 놓을까요?</S.Text>
-            <TouchableOpacity onPress={closeModal}>
-              <S.Text>X</S.Text>
-            </TouchableOpacity>
-          </S.HView>
-          <Button title="첫번째" onPress={() => changeShowingPhoto(0)} />
-          <Button title="두번째" onPress={() => changeShowingPhoto(1)} />
-          <Button title="세번째" onPress={() => changeShowingPhoto(2)} />
-          <Button title="네번째" onPress={() => changeShowingPhoto(3)} />
-        </S.View>
-      </Modal>
     </S.HomeLayout>
   );
 };

@@ -9,6 +9,7 @@ import ReactNativeRecoilPersist, {
 import theme from "./src/styles/theme";
 import { ThemeProvider } from "styled-components/native";
 import { StatusBar } from "expo-status-bar";
+import { Provider as PaperProvider } from "react-native-paper";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -23,12 +24,14 @@ const App = () => {
   return (
     <RecoilRoot>
       <ReactNativeRecoilPersistGate store={ReactNativeRecoilPersist}>
-        <ThemeProvider theme={theme}>
-          <NavigationContainer>
-            <RootNavigation />
-            <StatusBar style="dark" />
-          </NavigationContainer>
-        </ThemeProvider>
+        <PaperProvider>
+          <ThemeProvider theme={theme}>
+            <NavigationContainer>
+              <RootNavigation />
+              <StatusBar style="dark" />
+            </NavigationContainer>
+          </ThemeProvider>
+        </PaperProvider>
       </ReactNativeRecoilPersistGate>
     </RecoilRoot>
   );
