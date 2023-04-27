@@ -11,7 +11,7 @@ const RootTabs = () => {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName = "";
-          if (route.name === "Home") {
+          if (route.name === "Photos") {
             iconName = focused ? "home" : "home-outline";
           } else if (route.name === "Messages") {
             iconName = focused
@@ -23,7 +23,7 @@ const RootTabs = () => {
         },
       })}
     >
-      <BottomTabs.Screen name="Home" component={Home} />
+      <BottomTabs.Screen name="Photos" component={Home} />
       <BottomTabs.Screen name="Messages" component={Messages} />
     </BottomTabs.Navigator>
   );

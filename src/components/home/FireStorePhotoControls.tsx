@@ -22,7 +22,7 @@ const FireStorePhotoControls = () => {
   const setStoragePhotos = useSetRecoilState(storagePhotosState);
   // Recoil Selctor를 사용해 받은 현재 fb의 사진 길이
   const storagePhotosLength = useRecoilValue(storagePhotosCountSelctor);
-  const { openModal, changeModalContent } = useModal();
+  const { openModal, changeModalContent, closeModal } = useModal();
 
   const toggleChangingMode = useCallback(() => {
     setStoragePhotosControl((prev) => ({
@@ -135,6 +135,11 @@ const FireStorePhotoControls = () => {
         isPhotoLoading: false,
       }));
     } else {
+      setStoragePhotosControl((prev) => ({
+        ...prev,
+        isPhotoLoading: false,
+      }));
+      closeModal();
       console.log("취소");
     }
   }, []);

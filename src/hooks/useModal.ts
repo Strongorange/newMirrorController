@@ -15,6 +15,7 @@ export const useModal = () => {
     setStoragePhotosControl((prev) => ({
       ...prev,
       isModalVisible: false,
+      modalContent: undefined,
     }));
   }, [setStoragePhotosControl]);
 
