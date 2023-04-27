@@ -10,6 +10,7 @@ import theme from "./src/styles/theme";
 import { ThemeProvider } from "styled-components/native";
 import { StatusBar } from "expo-status-bar";
 import { Provider as PaperProvider } from "react-native-paper";
+import ModalBase from "./src/components/modals/ModalBase";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -29,6 +30,7 @@ const App = () => {
             <NavigationContainer>
               <RootNavigation />
               <StatusBar style="dark" />
+              <ModalBase />
             </NavigationContainer>
           </ThemeProvider>
         </PaperProvider>

@@ -15,20 +15,6 @@ const FireStorePhotoControls = () => {
   // Recoil Selctor를 사용해 받은 현재 fb의 사진 길이
   const storagePhotosLength = useRecoilValue(storagePhotosCountSelctor);
 
-  const showModal = useCallback(() => {
-    setStoragePhotosControl((prev) => ({
-      ...prev,
-      isModalVisible: true,
-    }));
-  }, []);
-
-  const hideModal = useCallback(() => {
-    setStoragePhotosControl((prev) => ({
-      ...prev,
-      isModalVisible: false,
-    }));
-  }, []);
-
   const toggleChangingMode = useCallback(() => {
     setStoragePhotosControl((prev) => ({
       ...prev,
@@ -54,16 +40,6 @@ const FireStorePhotoControls = () => {
           </Button>
         </S.Controler>
       </S.FirestorePhotosControlsLayout>
-
-      <Portal>
-        <Modal
-          visible={storagePhotosControl.isModalVisible}
-          onDismiss={hideModal}
-          style={{ justifyContent: "center", alignItems: "center" }}
-        >
-          <SwitchPhoto />
-        </Modal>
-      </Portal>
     </>
   );
 };

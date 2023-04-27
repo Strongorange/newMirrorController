@@ -4,6 +4,7 @@ interface StoragePhotosControlState {
   isDeletingMode: boolean;
   isChangingMode: boolean;
   isModalVisible: boolean;
+  modalContent?: JSX.Element | string;
 }
 
 export const storagePhotosControlState = atom<StoragePhotosControlState>({

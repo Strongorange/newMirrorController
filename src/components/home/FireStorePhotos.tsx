@@ -23,6 +23,7 @@ const FireStorePhotos = () => {
           <PhotoEditButton
             variant="change"
             visible={storagePhotosControl.isChangingMode}
+            item={item}
           />
           <S.Image key={item.id} source={{ uri: item.uri }} />
         </S.ImageContainer>
