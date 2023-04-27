@@ -1,4 +1,5 @@
 import { Dimensions } from "react-native";
+import FastImage from "react-native-fast-image";
 import styled from "styled-components/native";
 
 const width = Math.floor(Dimensions.get("window").width);
@@ -17,7 +18,7 @@ export const CurrentPhotoSlider = styled.FlatList``;
 
 export const TempView = styled.ScrollView``;
 
-export const Image = styled.Image`
+export const Image = styled(FastImage)`
   width: ${`${width / 3}px`};
   height: ${`${width / 3}px`};
   position: relative;

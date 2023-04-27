@@ -1,5 +1,5 @@
-import { View, Text } from "react-native";
-import React from "react";
+import { ListRenderItem } from "react-native";
+import React, { useCallback } from "react";
 import * as S from "../../styles/home/FirestorePhotos.style";
 import { useRecoilState } from "recoil";
 import {
@@ -10,14 +10,16 @@ import {
 const FireStorePhotos = () => {
   const [storagePhotos] = useRecoilState(storagePhotosState);
 
-  const renderItem = (props: any) => {
-    console.log(props);
+  // 컴포넌트가 렌더링 될 때마다 새로운 함수 생성 방지
+  const keyExtractor = useCallback((item: StoragePhoto) => String(item.id), []);
+  const renderItem = useCallback<ListRenderItem<StoragePhoto>>(({ item }) => {
+    console.log("item", item);
     return (
-      <View>
-        <Text>wow</Text>
-      </View>
+      <S.ImageContainer>
+        <S.Image key={item.id} source={{ uri: item.uri }} />
+      </S.ImageContainer>
     );
-  };
+  }, []);
 
   return (
     <S.FirestorePhotosLayout key={"wow"}>
@@ -27,12 +29,17 @@ const FireStorePhotos = () => {
         <S.ControlerName>현재 사진 변경</S.ControlerName>
         <S.ControlerName>사진 추가</S.ControlerName>
       </S.ControlersBox>
-
-      <S.ImageFlatList
-        data={storagePhotos}
-        renderItem={renderItem}
-        keyExtractor={(item: StoragePhoto, index: number) => item.id}
-      />
+      <S.FlatListContainer>
+        <S.ImageFlatList
+          data={storagePhotos}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          numColumns={2}
+          initialNumToRender={8}
+          windowSize={12}
+          removeClippedSubviews
+        />
+      </S.FlatListContainer>
     </S.FirestorePhotosLayout>
   );
 };

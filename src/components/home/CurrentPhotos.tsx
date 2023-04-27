@@ -1,4 +1,5 @@
 import React from "react";
+import FastImage from "react-native-fast-image";
 import { useRecoilState } from "recoil";
 import { showingPhotosState } from "../../states/showingPhotosState";
 import * as S from "../../styles/home/CurrentPhotos.style";
