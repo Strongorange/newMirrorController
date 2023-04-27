@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import * as S from "../../styles/home/FirestorePhotosControls.style";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { storagePhotosControlState } from "../../states/storagePhotosControlState";
@@ -16,8 +16,29 @@ const FireStorePhotoControls = () => {
     setStoragePhotosControl((prev) => ({
       ...prev,
       isChangingMode: !prev.isChangingMode,
+      isDeletingMode: false,
     }));
-  }, []);
+  }, [
+    storagePhotosControl.isChangingMode,
+    storagePhotosControl.isDeletingMode,
+    setStoragePhotosControl,
+  ]);
+
+  const toggleDeletingMode = useCallback(() => {
+    setStoragePhotosControl((prev) => ({
+      ...prev,
+      isDeletingMode: !prev.isDeletingMode,
+      isChangingMode: false,
+    }));
+  }, [
+    storagePhotosControl.isChangingMode,
+    storagePhotosControl.isDeletingMode,
+    setStoragePhotosControl,
+  ]);
+
+  useEffect(() => {
+    console.log(storagePhotosControl);
+  }, [storagePhotosControl, setStoragePhotosControl]);
 
   return (
     <>
@@ -25,7 +46,7 @@ const FireStorePhotoControls = () => {
         <Button icon="format-list-bulleted" compact mode="text">
           사진({storagePhotosLength})
         </Button>
-        <Button compact icon="trash-can-outline">
+        <Button compact icon="trash-can-outline" onPress={toggleDeletingMode}>
           <S.ControlerName>삭제</S.ControlerName>
         </Button>
         <Button compact icon="swap-vertical" onPress={toggleChangingMode}>

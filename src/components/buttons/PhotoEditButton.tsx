@@ -2,6 +2,7 @@ import React from "react";
 import { useModal } from "../../hooks/useModal";
 import { StoragePhoto } from "../../states/storagePhotosState";
 import * as S from "../../styles/buttons/PhotoEditButton.style";
+import DeletePhotoModalContent from "../home/DeletePhotoModalContent";
 import SwitchPhotoModalContent from "../home/SwitchPhotoModalContent";
 
 type PhotoEditButtonProps = {
@@ -28,7 +29,14 @@ const PhotoEditButton = ({
       compact={compact}
       buttonColor={buttonColor}
       onPress={() =>
-        openModal({ content: <SwitchPhotoModalContent item={item} /> })
+        openModal({
+          content:
+            variant === "change" ? (
+              <SwitchPhotoModalContent item={item} />
+            ) : (
+              <DeletePhotoModalContent item={item} />
+            ),
+        })
       }
     >
       <S.Text>{textContent}</S.Text>

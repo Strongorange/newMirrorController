@@ -21,15 +21,18 @@ const FireStorePhotos = () => {
       return (
         <S.ImageContainer>
           <PhotoEditButton
-            variant="change"
-            visible={storagePhotosControl.isChangingMode}
+            variant={storagePhotosControl.isChangingMode ? "change" : "delete"}
+            visible={
+              storagePhotosControl.isChangingMode ||
+              storagePhotosControl.isDeletingMode
+            }
             item={item}
           />
           <S.Image key={item.id} source={{ uri: item.uri }} />
         </S.ImageContainer>
       );
     },
-    [storagePhotosControl.isChangingMode]
+    [storagePhotosControl.isChangingMode, storagePhotosControl.isDeletingMode]
   );
 
   return (
