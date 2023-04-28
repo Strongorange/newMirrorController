@@ -5,21 +5,20 @@ import styled from "styled-components/native";
 const width = Math.floor(Dimensions.get("window").width);
 
 export const CurrentPhotoContainer = styled.View`
-  flex: 1;
-  background-color: ${({ theme }) => theme.colors.MAIN};
+  flex: 2;
+  align-items: stretch;
 `;
 
 export const CurrentPhotoTitle = styled.Text`
   font-size: 22px;
   font-weight: 600;
+  padding: 20px 0;
 `;
 
 export const CurrentPhotoSlider = styled.FlatList``;
 
-export const TempView = styled.ScrollView``;
-
 export const Image = styled(FastImage)`
-  width: ${`${width / 3}px`};
-  height: ${`${width / 3}px`};
+  width: ${`${width / 2.5}px`};
+  height: ${`${width / 2.5}px`};
   position: relative;
 `;
