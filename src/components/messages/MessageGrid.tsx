@@ -1,12 +1,12 @@
 import { View, Text } from "react-native";
 import React from "react";
 
-const Comp = () => {
+const MessageGrid = () => {
   return (
     <View>
-      <Text>Comp</Text>
+      <Text>MessageGrid</Text>
     </View>
   );
 };
 
-export default Comp;
+export default MessageGrid;

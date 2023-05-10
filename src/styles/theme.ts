@@ -1,5 +1,3 @@
-import { DefaultTheme } from "styled-components";
-
 interface colorsProps {
   MAIN: string;
 }
