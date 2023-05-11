@@ -12,7 +12,6 @@ import FireStorePhotoControls from "../components/home/FireStorePhotoControls";
 import initFB from "../utils/initFirebase";
 import { userState } from "../states/authState";
 
-// Your web app's Firebase configuration
 initFB();
 const storage = getStorage();
 
@@ -23,32 +22,45 @@ const HomeOthers = () => {
     useRecoilState(showingPhotosState);
   const [storagePhotosAtom, setStoragePhotosAtom] =
     useRecoilState(storagePhotosState);
-  const [isInitialLoading, setIsInitialLoading] = useState(false);
-
-  const listRef = ref(storage, `/${user?.uid}/`);
-
-  function onResultPhoto(QuerySnapshot: any) {
-    setShowingPhotosAtom(QuerySnapshot.data().photos);
-  }
-
-  function onError(error: any) {
-    console.error(error);
-  }
-
-  // TODO: Firestore에 저장된 현재 Display되는 사진 가져와 ShowingPhotosAtom에 저장
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
+    const getStoragePhotos = async () => {
+      const listRef = ref(storage, `/${user?.uid}/`);
+      const storageResponse = await listAll(listRef);
+      const storagePhotos: StoragePhoto[] = [];
+
+      for (const itemRef of storageResponse.items) {
+        const reference: any = ref(storage, itemRef.fullPath);
+        const downloadUrl = await getDownloadURL(reference);
+        const newImage = {
+          uri: downloadUrl,
+          path: reference._location.path,
+          id: reference._location.path,
+        };
+        storagePhotos.push(newImage);
+      }
+
+      setStoragePhotosAtom(storagePhotos);
+    };
+
+    setIsInitialLoading(true);
     if (user) {
       try {
+        // fireStore에서 Gallery 정보 가져오기
         const collectionRef = firestore().collection(`${user.uid}`);
-        const galleryUnsubscribe = collectionRef
-          .doc("gallery")
-          .onSnapshot((documentSnapshot) => {
+        const galleryUnsubscribe = collectionRef.doc("gallery").onSnapshot(
+          (documentSnapshot) => {
             const showingPhotos = documentSnapshot.data()?.photos;
             if (showingPhotos) {
               setShowingPhotosAtom(showingPhotos);
             }
-          });
+          },
+          (error) => console.log(error)
+        );
+
+        // storage에서 사진 가져오기
+        getStoragePhotos();
 
         return () => {
           galleryUnsubscribe();
@@ -61,49 +73,20 @@ const HomeOthers = () => {
     } else {
       console.log("User is not logged in");
     }
-  }, []);
-
-  //   useEffect(() => {
-  //     const getStoragePhotos = async () => {
-  //       const storageRes = await listAll(listRef);
-  //       const storagePhotos: StoragePhoto[] = [];
-
-  //       for (const itemRef of storageRes.items) {
-  //         const reference: any = ref(storage, itemRef.fullPath);
-  //         const downloadUrl = await getDownloadURL(reference);
-  //         const newImage = {
-  //           uri: downloadUrl,
-  //           path: reference._location.path,
-  //           id: reference._location.path,
-  //         };
-  //         storagePhotos.push(newImage);
-  //       }
-
-  //       setStoragePhotosAtom(storagePhotos);
-  //     };
-  //     try {
-  //       setIsInitialLoading(true);
-  //       firestore()
-  //         .collection("mirror")
-  //         .doc("gallery")
-  //         .onSnapshot(onResultPhoto, onError);
-
-  //       getStoragePhotos();
-  //     } catch (error) {
-  //       console.log(error);
-  //     } finally {
-  //       setIsInitialLoading(false);
-  //     }
-  //   }, []);
+  }, [user]);
 
   // 디버깅
   //   useEffect(() => {
   //     console.log(user);
   //   }, [user]);
 
-  useEffect(() => {
-    console.log(showingPhotosAtom);
-  }, [showingPhotosAtom]);
+  //   useEffect(() => {
+  //     console.log(showingPhotosAtom);
+  //   }, [showingPhotosAtom]);
+
+  //   useEffect(() => {
+  //     console.log(storagePhotosAtom);
+  //   }, [storagePhotosAtom]);
 
   return isInitialLoading ? (
     <S.HomeLayout>
@@ -111,10 +94,9 @@ const HomeOthers = () => {
     </S.HomeLayout>
   ) : (
     <S.HomeLayout>
-      <S.Text>Others!</S.Text>
-      {/* <CurrentPhotos />
+      <CurrentPhotos />
       <FireStorePhotoControls />
-      <FireStorePhotos /> */}
+      <FireStorePhotos />
     </S.HomeLayout>
   );
 };
