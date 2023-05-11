@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as S from "../../styles/auth/Login.style";
 import initFB from "../../utils/initFirebase";
 import auth from "@react-native-firebase/auth";
@@ -53,11 +53,13 @@ const Login = () => {
           <S.FormInput
             mode="flat"
             label={"email"}
+            value={email}
             onChangeText={(text) => handleEmail(text)}
           />
           <S.FormInput
             mode="flat"
             label={"password"}
+            value={password}
             onChangeText={(text) => handlePassword(text)}
           />
         </S.InputWrapper>

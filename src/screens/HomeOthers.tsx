@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import firestore from "@react-native-firebase/firestore";
 import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage";
-import * as SplashScreen from "expo-splash-screen";
 import * as S from "../styles/home.style";
 import CurrentPhotos from "../components/home/CurrentPhotos";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -120,9 +119,9 @@ const HomeOthers = () => {
   //     console.log(showingPhotosAtom);
   //   }, [showingPhotosAtom]);
 
-  //   useEffect(() => {
-  //     console.log(storagePhotosAtom);
-  //   }, [storagePhotosAtom]);
+  useEffect(() => {
+    console.log(storagePhotosAtom);
+  }, [storagePhotosAtom]);
 
   return isInitialLoading ? (
     <S.HomeLayout>

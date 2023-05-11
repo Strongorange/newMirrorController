@@ -81,7 +81,9 @@ const FireStorePhotoControls = () => {
         // 로그인된 User의 uid별로 FireStorage에 폴더를 만들어서 저장
         const fileRef: any = ref(
           storage,
-          `/${user ? user.uid : "unknown"}/${currentTime}`
+          `/${user ? user.uid : "unknown"}/${currentTime}.${
+            isVideo ? "gif" : "jpg"
+          }`
         );
         const storagePath = fileRef._location.path;
         const firebaseUploadResult = await uploadBytes(fileRef, blob);
