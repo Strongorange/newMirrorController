@@ -1,12 +1,12 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Home from "../screens/Home";
 import Messages from "../screens/Messages";
 import Icon from "react-native-vector-icons/Ionicons";
 import Settings from "../screens/Settings";
+import HomeOthers from "../screens/HomeOthers";
 
 const BottomTabs = createBottomTabNavigator();
 
-const RootTabs = () => {
+const OthersTabs = () => {
   return (
     <BottomTabs.Navigator
       screenOptions={({ route }) => ({
@@ -24,11 +24,11 @@ const RootTabs = () => {
         },
       })}
     >
-      <BottomTabs.Screen name="Photos" component={Home} />
+      <BottomTabs.Screen name="Photos" component={HomeOthers} />
       <BottomTabs.Screen name="Messages" component={Messages} />
       <BottomTabs.Screen name="Settings" component={Settings} />
     </BottomTabs.Navigator>
   );
 };
 
-export default RootTabs;
+export default OthersTabs;

@@ -14,8 +14,10 @@ import { Alert } from "react-native";
 import { useModal } from "../../hooks/useModal";
 import LoadingModal from "../modals/LoadingModal";
 import FinishModal from "../modals/FinishModal";
+import { userState } from "../../states/authState";
 
 const FireStorePhotoControls = () => {
+  const user = useRecoilValue(userState);
   const [storagePhotosControl, setStoragePhotosControl] = useRecoilState(
     storagePhotosControlState
   );
@@ -71,11 +73,21 @@ const FireStorePhotoControls = () => {
         });
 
         const storage = getStorage();
-        const fileRef: any = ref(storage, uuidv4());
-
+        const currentTime = new Intl.DateTimeFormat("ko-KR", {
+          dateStyle: "full",
+          timeStyle: "full",
+          hour12: false,
+        }).format(new Date());
+        // 로그인된 User의 uid별로 FireStorage에 폴더를 만들어서 저장
+        const fileRef: any = ref(
+          storage,
+          `/${user ? user.uid : "unknown"}/${currentTime}.${
+            isVideo ? "gif" : "jpg"
+          }`
+        );
         const storagePath = fileRef._location.path;
-        const result2 = await uploadBytes(fileRef, blob);
-        const createdTime = result2.metadata.timeCreated;
+        const firebaseUploadResult = await uploadBytes(fileRef, blob);
+        const createdTime = firebaseUploadResult.metadata.timeCreated;
         const downloadUrl = await getDownloadURL(fileRef);
 
         setStoragePhotos((state) => [
@@ -103,7 +115,7 @@ const FireStorePhotoControls = () => {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
-      quality: 0,
+      quality: 0.3,
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       aspect: [1, 1],
     });

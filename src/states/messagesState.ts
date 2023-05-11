@@ -1,10 +1,8 @@
 import { atom, selector } from "recoil";
-import ReactNativeRecoilPersist from "react-native-recoil-persist";
 
 export const messagesState = atom({
   key: "messagesState",
   default: {},
-  effects_UNSTABLE: [ReactNativeRecoilPersist.persistAtom],
 });
 
 export const isMessagesLoadingState = selector({
