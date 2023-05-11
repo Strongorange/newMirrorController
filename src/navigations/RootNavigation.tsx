@@ -13,7 +13,7 @@ const RootNavigation = () => {
 
   return (
     <RootStack.Navigator
-      initialRouteName={user ? "RootBottomTabs" : "Login"}
+      initialRouteName={user ? "OthersBottomTabs" : "Login"}
       screenOptions={{ headerShown: false }}
     >
       <RootStack.Screen name="Login" component={Login} />

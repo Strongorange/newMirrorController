@@ -6,18 +6,27 @@ import auth from "@react-native-firebase/auth";
 import { useSetRecoilState } from "recoil";
 import { userState } from "../states/authState";
 import { useNavigation } from "@react-navigation/native";
+import { storagePhotosState } from "../states/storagePhotosState";
+import { showingPhotosState } from "../states/showingPhotosState";
 
 const Settings = () => {
   const setUser = useSetRecoilState(userState);
+  const setStoragePhoto = useSetRecoilState(storagePhotosState);
+  const setShowingPhotos = useSetRecoilState(showingPhotosState);
   const navigation = useNavigation();
-  initFB();
+  // initFB();
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     try {
-      await auth().signOut();
-      setUser(null);
-      //@ts-ignore
-      navigation.navigate("Login");
+      auth()
+        .signOut()
+        .then(() => {
+          setUser(null);
+          setStoragePhoto([]);
+          setShowingPhotos([]);
+          //@ts-ignore
+          navigation.navigate("Login");
+        });
     } catch (error) {
       console.log(error);
     }

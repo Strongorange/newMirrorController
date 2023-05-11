@@ -7,6 +7,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { storagePhotosControlState } from "../../states/storagePhotosControlState";
 import firestore from "@react-native-firebase/firestore";
 import { userState } from "../../states/authState";
+import { useNavigation } from "@react-navigation/native";
 
 interface SwitchPhotoModalContentProps {
   item: StoragePhoto;
@@ -14,36 +15,41 @@ interface SwitchPhotoModalContentProps {
 
 const SwitchPhotoModalContent = ({ item }: SwitchPhotoModalContentProps) => {
   const user = useRecoilValue(userState);
+  const navigation = useNavigation();
   const [showingPhotos, setShowingPhotos] = useRecoilState(showingPhotosState);
   const [storagePhotosControl, setStoragePhotosControl] = useRecoilState(
     storagePhotosControlState
   );
 
   const changeShowingPhoto = async (index: number) => {
-    try {
-      setStoragePhotosControl((prev) => ({
-        ...prev,
-        isPhotoLoading: true,
-      }));
-      const currentPhotoArr = [...showingPhotos];
-      currentPhotoArr[index] = item.uri;
-      setShowingPhotos(currentPhotoArr);
-      await firestore()
-        .collection(user ? user.uid : "mirror")
-        .doc("gallery")
-        .set({
+    if (user) {
+      try {
+        setStoragePhotosControl((prev) => ({
+          ...prev,
+          isPhotoLoading: true,
+        }));
+        const currentPhotoArr = [...showingPhotos];
+        currentPhotoArr[index] = item.uri;
+        setShowingPhotos(currentPhotoArr);
+
+        await firestore().collection(user.uid).doc("gallery").set({
           photos: currentPhotoArr,
         });
-      Alert.alert("변경 완료", "사진이 변경되었습니다.");
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setStoragePhotosControl((prev) => ({
-        ...prev,
-        isPhotoLoading: false,
-        isChangingMode: false,
-        isModalVisible: false,
-      }));
+        Alert.alert("변경 완료", "사진이 변경되었습니다.");
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setStoragePhotosControl((prev) => ({
+          ...prev,
+          isPhotoLoading: false,
+          isChangingMode: false,
+          isModalVisible: false,
+        }));
+      }
+    } else {
+      Alert.alert("로그인이 필요합니다.", "로그인 페이지로 이동합니다.");
+      //@ts-ignore
+      navigation.navigate("Login");
     }
   };
 

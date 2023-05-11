@@ -8,7 +8,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { isMessagesLoadingState, messagesState } from "../states/messagesState";
 import { ActivityIndicator } from "react-native-paper";
 
-initFB();
+// initFB();
 
 const Messages = () => {
   const [messages, setMessages] = useRecoilState(messagesState);
@@ -18,7 +18,7 @@ const Messages = () => {
     (
       QuerySnapshot: FirebaseFirestoreTypes.DocumentSnapshot<FirebaseFirestoreTypes.DocumentData>
     ) => {
-      setMessages(QuerySnapshot.data());
+      // setMessages(QuerySnapshot.data());
     },
     []
   );

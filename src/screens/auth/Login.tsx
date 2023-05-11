@@ -3,13 +3,14 @@ import * as S from "../../styles/auth/Login.style";
 import initFB from "../../utils/initFirebase";
 import auth from "@react-native-firebase/auth";
 import { useNavigation, TypedNavigator } from "@react-navigation/native";
+import { useSetRecoilState } from "recoil";
+import { userState } from "../../states/authState";
 
 const Login = () => {
-  initFB();
-
   // states
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const setUser = useSetRecoilState(userState);
 
   // Navigation 아동을 위한 navigation 객체
   const navigation = useNavigation();
@@ -28,7 +29,14 @@ const Login = () => {
     }
 
     try {
-      await auth().signInWithEmailAndPassword(email, password);
+      console.log("로그인 시도", email, password);
+      const signInResponse = await auth().signInWithEmailAndPassword(
+        email,
+        password
+      );
+      setUser(signInResponse.user);
+
+      console.log("로그인 성공", signInResponse.user.email);
       setEmail("");
       setPassword("");
       // @ts-ignore

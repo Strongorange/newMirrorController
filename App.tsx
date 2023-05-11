@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { NavigationContainer } from "@react-navigation/native";
 import RootNavigation from "./src/navigations/RootNavigation";
@@ -19,30 +19,9 @@ SplashScreen.preventAutoHideAsync();
 
 const AppContent = () => {
   const [userAtom, setUserAtom] = useRecoilState(userState);
-  const [isLoggedIn, setIsLoggedIn] = useRecoilState(isLoggedInState);
-
-  initFB();
-
-  // firebase user 감지
-  useEffect(() => {
-    const unsubscribeUser = auth().onAuthStateChanged((user) => {
-      if (user) {
-        setIsLoggedIn(true);
-        setUserAtom(user);
-      }
-      if (user === null) {
-        setIsLoggedIn(false);
-        setUserAtom(null);
-      }
-    });
-
-    return () => {
-      unsubscribeUser();
-    };
-  }, []);
 
   useEffect(() => {
-    console.log(userAtom);
+    console.log("user From App.tsx", userAtom?.email);
   }, [userAtom]);
 
   return (
