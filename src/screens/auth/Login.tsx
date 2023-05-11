@@ -32,7 +32,7 @@ const Login = () => {
       setEmail("");
       setPassword("");
       // @ts-ignore
-      navigation.navigate("RootBottomTabs", { screen: "Photos" });
+      navigation.navigate("OthersBottomTabs", { screen: "Photos" });
     } catch (error) {
       console.log(error);
     }

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { NavigationContainer } from "@react-navigation/native";
 import RootNavigation from "./src/navigations/RootNavigation";
-import { RecoilRoot, useRecoilState, useRecoilValue } from "recoil";
+import { RecoilRoot, useRecoilState } from "recoil";
 import ReactNativeRecoilPersist, {
   ReactNativeRecoilPersistGate,
 } from "react-native-recoil-persist";
@@ -12,8 +12,7 @@ import { StatusBar } from "expo-status-bar";
 import { Provider as PaperProvider } from "react-native-paper";
 import ModalBase from "./src/components/modals/ModalBase";
 import { isLoggedInState, userState } from "./src/states/authState";
-import Login from "./src/screens/auth/Login";
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import auth from "@react-native-firebase/auth";
 import initFB from "./src/utils/initFirebase";
 
 SplashScreen.preventAutoHideAsync();
@@ -36,6 +35,10 @@ const AppContent = () => {
         setUserAtom(null);
       }
     });
+
+    return () => {
+      unsubscribeUser();
+    };
   }, []);
 
   useEffect(() => {
