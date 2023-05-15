@@ -2,7 +2,6 @@ import { FlatList, Dimensions } from "react-native";
 import FastImage from "react-native-fast-image";
 import styled from "styled-components/native";
 import { getDeviceSize } from "../../utils/getDeviceSize";
-import { Button } from "react-native-paper";
 
 const { width } = getDeviceSize();
 

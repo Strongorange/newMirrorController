@@ -3,6 +3,7 @@ import Messages from "../screens/Messages";
 import Icon from "react-native-vector-icons/Ionicons";
 import Settings from "../screens/Settings";
 import HomeOthers from "../screens/HomeOthers";
+import MessagesNavigation from "./messages/MessagesStack";
 
 const BottomTabs = createBottomTabNavigator();
 
@@ -25,7 +26,8 @@ const OthersTabs = () => {
       })}
     >
       <BottomTabs.Screen name="Photos" component={HomeOthers} />
-      <BottomTabs.Screen name="Messages" component={Messages} />
+      {/* <BottomTabs.Screen name="Messages" component={Messages} /> */}
+      <BottomTabs.Screen name="Messages" component={MessagesNavigation} />
       <BottomTabs.Screen name="Settings" component={Settings} />
     </BottomTabs.Navigator>
   );

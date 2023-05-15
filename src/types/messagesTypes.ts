@@ -1,4 +1,4 @@
-export interface Messages {
+export interface MessagesType {
   clear: string[];
   rain: string[];
   midnight: string[];
@@ -13,7 +13,7 @@ export interface Messages {
   snow: string[];
 }
 
-export const defaultMessages: Messages = {
+export const defaultMessages: MessagesType = {
   clear: [],
   rain: [],
   midnight: [],
