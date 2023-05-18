@@ -32,6 +32,6 @@
 3. 메세지
    1. [x] Firestore 에서 Messages 가져오기
    2. 메시지 CUD
-      1. Create
+      1. [x] Create
       2. Update
       3. Delete
