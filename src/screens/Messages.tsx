@@ -1,4 +1,3 @@
-import { View, Text } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import firestore, {
   FirebaseFirestoreTypes,

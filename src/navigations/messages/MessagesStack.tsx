@@ -1,12 +1,20 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Messages from "../../screens/Messages";
 import MessagesCRUD from "../../screens/messages/MessagesCRUD";
+import { MessagesType } from "../../types/messagesTypes";
 
-const MessagesStack = createNativeStackNavigator();
+type StackParamList = {
+  MessagesMain: undefined;
+  MessagesCRUD: {
+    key: keyof MessagesType;
+  };
+};
+
+const MessagesStack = createNativeStackNavigator<StackParamList>();
 
 const MessagesNavigation = () => {
   return (
-    <MessagesStack.Navigator>
+    <MessagesStack.Navigator screenOptions={{ headerShown: false }}>
       <MessagesStack.Screen name="MessagesMain" component={Messages} />
       <MessagesStack.Screen name="MessagesCRUD" component={MessagesCRUD} />
     </MessagesStack.Navigator>
