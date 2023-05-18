@@ -54,7 +54,9 @@ export const CRUDItemWrapper = styled.View`
 
 export const CRUDItem = styled.Text``;
 
-export const CRUDItemButtonWrapper = styled.View``;
+export const CRUDItemButtonWrapper = styled.View`
+  flex-direction: row;
+`;
 
 export const CRUDItemButton = styled.Pressable``;
 
@@ -74,6 +76,8 @@ export const CreateMessageModalLayout = styled.View`
   justify-content: center;
   align-items: center;
 `;
+
+export const UpdateMessageModalLayout = styled(CreateMessageModalLayout)``;
 
 export const Input = styled(TextInput)`
   width: 100%;

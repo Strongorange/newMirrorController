@@ -5,11 +5,12 @@ import { useRecoilValue } from "recoil";
 import { messageSelector } from "../../states/messagesState";
 import { MessagesType } from "../../types/messagesTypes";
 import * as S from "../../styles/messages/messages.style";
-import { ActivityIndicator, Button, Dialog, Portal } from "react-native-paper";
+import { Button, Dialog, Portal, IconButton } from "react-native-paper";
 import { useModal } from "../../hooks/useModal";
 import CreateMessageModal from "../../components/modals/messages/CreateMessageModal";
 import firestore from "@react-native-firebase/firestore";
 import { userState } from "../../states/authState";
+import UpdateMessageModal from "../../components/modals/messages/UpdateMessageModal";
 
 type StackParamList = {
   MessagesCRUD: {
@@ -28,7 +29,7 @@ const MessagesCRUD = ({ route }: MessagesCRUDProps) => {
   const messages = useRecoilValue(messageSelector(key));
   const { openModal, changeModalContent } = useModal();
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [willDeleteMessage, setWillDeleteMessage] = useState<string>("");
+  const [willChangeMessage, setWillChangeMessage] = useState<string>("");
   const user = useRecoilValue(userState);
 
   // FUNCTIONS
@@ -38,7 +39,7 @@ const MessagesCRUD = ({ route }: MessagesCRUDProps) => {
   };
 
   const openDialog = (item: string) => {
-    setWillDeleteMessage(item);
+    setWillChangeMessage(item);
     setDialogVisible(true);
   };
 
@@ -51,7 +52,6 @@ const MessagesCRUD = ({ route }: MessagesCRUDProps) => {
   };
 
   const deleteMessage = async () => {
-    //TODO: 메세지 삭제
     if (user) {
       const documentRef = firestore().collection(user.uid).doc("messages");
       const document = await documentRef.get();
@@ -59,7 +59,7 @@ const MessagesCRUD = ({ route }: MessagesCRUDProps) => {
       if (document.exists) {
         try {
           await documentRef.update({
-            [key]: firestore.FieldValue.arrayRemove(willDeleteMessage),
+            [key]: firestore.FieldValue.arrayRemove(willChangeMessage),
           });
           closeDialog();
         } catch (error) {
@@ -73,14 +73,26 @@ const MessagesCRUD = ({ route }: MessagesCRUDProps) => {
     }
   };
 
+  const updateMessage = async (item: string) => {
+    openModal({
+      content: <UpdateMessageModal currentKey={key} currentMessage={item} />,
+    });
+  };
+
   const renderItem = useCallback<ListRenderItem<string>>(({ item }) => {
     return (
       <S.CRUDItemWrapper>
         <S.CRUDItem>{item}</S.CRUDItem>
         <S.CRUDItemButtonWrapper>
-          <Button mode="contained-tonal" onPress={() => openDialog(item)}>
-            삭제
-          </Button>
+          <IconButton
+            icon="trash-can-outline"
+            onPress={() => openDialog(item)}
+          />
+
+          <IconButton
+            icon="pencil-outline"
+            onPress={() => updateMessage(item)}
+          />
         </S.CRUDItemButtonWrapper>
       </S.CRUDItemWrapper>
     );
@@ -101,7 +113,7 @@ const MessagesCRUD = ({ route }: MessagesCRUDProps) => {
             <Text
               style={{ fontStyle: "italic", textDecorationLine: "underline" }}
             >
-              {willDeleteMessage}
+              {willChangeMessage}
             </Text>
             <Text>를 삭제하시겠습니까?</Text>
           </Dialog.Content>
