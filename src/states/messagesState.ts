@@ -1,14 +1,18 @@
-import { atom, selector } from "recoil";
+import { atom, selector, selectorFamily } from "recoil";
+import { defaultMessages, MessagesType } from "../types/messagesTypes";
 
 export const messagesState = atom({
   key: "messagesState",
-  default: {},
+  default: defaultMessages,
 });
 
-export const isMessagesLoadingState = selector({
-  key: "isMessagesLoadingState",
-  get: ({ get }) => {
-    const messages = get(messagesState);
-    return Object.keys(messages).length === 0;
-  },
+// key를 받아서 해당 key의 value를 반환하는 selectorFamily
+export const messageSelector = selectorFamily({
+  key: "messageSelector",
+  get:
+    (key: keyof MessagesType) =>
+    ({ get }) => {
+      const messages = get(messagesState);
+      return messages[key];
+    },
 });
