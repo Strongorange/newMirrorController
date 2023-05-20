@@ -8,6 +8,7 @@ import {
   defaultFirestoreSettings,
   FirestoreSettings,
 } from "../../types/firestoreSettings";
+import CurrentLocation from "../../components/location/CurrentLocation";
 
 const Location = () => {
   const user = useRecoilValue(userState);
@@ -66,7 +67,7 @@ const Location = () => {
 
   return (
     <S.LocationLayout>
-      <Text>Location</Text>
+      <CurrentLocation settings={settings} />
     </S.LocationLayout>
   );
 };

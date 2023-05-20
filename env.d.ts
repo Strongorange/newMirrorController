@@ -5,4 +5,5 @@ declare module "@env" {
   export const FB_STORAGE_BUCKET: string;
   export const FB_MESSAGING_SENDER_ID: string;
   export const FB_APP_ID: string;
+  export const DUST_API_KEY: string;
 }
