@@ -1,6 +1,6 @@
 import { Text, FlatList, ListRenderItem } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useNavigation } from "@react-navigation/native";
 import { useRecoilValue } from "recoil";
 import { messageSelector } from "../../states/messagesState";
 import { MessagesType } from "../../types/messagesTypes";
@@ -31,6 +31,7 @@ const MessagesCRUD = ({ route }: MessagesCRUDProps) => {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [willChangeMessage, setWillChangeMessage] = useState<string>("");
   const user = useRecoilValue(userState);
+  const navigation = useNavigation();
 
   // FUNCTIONS
 
@@ -97,6 +98,15 @@ const MessagesCRUD = ({ route }: MessagesCRUDProps) => {
       </S.CRUDItemWrapper>
     );
   }, []);
+
+  // EFFECTS
+  // 헤더 타이틀을 `key` 값으로 변경
+  useEffect(() => {
+    if (key) {
+      navigation.setOptions({ title: key });
+    }
+  }, [key]);
+
   //디버깅
   useEffect(() => {
     console.log("messages of CRUD", messages);
