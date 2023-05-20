@@ -14,8 +14,12 @@ const MessagesStack = createNativeStackNavigator<StackParamList>();
 
 const MessagesNavigation = () => {
   return (
-    <MessagesStack.Navigator screenOptions={{ headerShown: false }}>
-      <MessagesStack.Screen name="MessagesMain" component={Messages} />
+    <MessagesStack.Navigator>
+      <MessagesStack.Screen
+        name="MessagesMain"
+        options={{ title: "Message" }}
+        component={Messages}
+      />
       <MessagesStack.Screen name="MessagesCRUD" component={MessagesCRUD} />
     </MessagesStack.Navigator>
   );
