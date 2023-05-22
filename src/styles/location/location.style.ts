@@ -16,7 +16,10 @@ export const CardRow = styled.View`
   flex-direction: row;
 `;
 
-export const Title = styled.Text``;
+export const Title = styled.Text`
+  font-size: 20px;
+  font-weight: bold;
+`;
 
 export const Text = styled.Text``;
 
