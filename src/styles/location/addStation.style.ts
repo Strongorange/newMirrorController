@@ -3,6 +3,7 @@ import { Button, Card, Dialog, Portal, IconButton } from "react-native-paper";
 
 export const AddStationLayout = styled.View`
   flex: 1;
+  padding: 20px;
 `;
 
 export const CurrentLocationCard = styled(Card)``;

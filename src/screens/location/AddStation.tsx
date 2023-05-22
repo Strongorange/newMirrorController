@@ -1,9 +1,22 @@
-import { View, Text, ScrollView, FlatList, ListRenderItem } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  FlatList,
+  ListRenderItem,
+  Pressable,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import * as S from "../../styles/location/addStation.style";
 import getDustStations from "../../utils/getDustStations";
 import { useNavigation } from "@react-navigation/native";
-import { Button, Dialog, Portal, RadioButton } from "react-native-paper";
+import {
+  ActivityIndicator,
+  Button,
+  Dialog,
+  Portal,
+  RadioButton,
+} from "react-native-paper";
 import { DustStation } from "../../types/dustStationTypes";
 import {
   KoreanDistricts,
@@ -12,11 +25,12 @@ import {
 import firestore from "@react-native-firebase/firestore";
 import { useRecoilValue } from "recoil";
 import { userState } from "../../states/authState";
-import { FirestoreSettings } from "../../types/firestoreSettings";
 
 const AddStation = () => {
   const navigation = useNavigation();
   const user = useRecoilValue(userState);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [fetchError, setFetchError] = useState<string>("");
   const [dustStations, setDustStations] = useState<DustStation[]>([]);
   const [dialogVisible, setDialogVisible] = useState<boolean>(false);
   const [dialogSelectedDistrict, setDialogSelectedDistrict] = useState<
@@ -27,12 +41,16 @@ const AddStation = () => {
   >("");
   // FUNCTIONS
   const callGetDustStations = async (district: KoreanDistricts) => {
+    setIsFetching(true);
     try {
       const stations = await getDustStations(district);
       console.log(stations);
       setDustStations(stations);
     } catch (error) {
       console.log(error);
+      setFetchError("측정소를 불러오는데 실패했습니다 다시 시도해주세요");
+    } finally {
+      setIsFetching(false);
     }
   };
 
@@ -59,6 +77,7 @@ const AddStation = () => {
         await documentRef.update({
           location: newLocation,
         });
+        navigation.goBack();
       } else {
         console.log("Settings document does not exist");
       }
@@ -105,7 +124,15 @@ const AddStation = () => {
         지역을 선택해주세요
       </Button>
 
-      {dustStations && (
+      {isFetching && (
+        <View style={{ flex: 1, justifyContent: "center" }}>
+          <ActivityIndicator size="large" />
+        </View>
+      )}
+
+      {fetchError !== "" && <Text>{String(fetchError)}</Text>}
+
+      {dustStations && !fetchError && !isFetching && (
         <FlatList
           data={dustStations}
           renderItem={renderItem}
@@ -130,12 +157,13 @@ const AddStation = () => {
                 KoreanDistrictsArray.map((district) => {
                   if (district === "전국") return;
                   return (
-                    <View
+                    <Pressable
                       key={district}
                       style={{ flexDirection: "row", alignItems: "center" }}
+                      onPress={() => setDialogSelectedDistrict(district)}
                     >
                       <RadioButton
-                        value={"wow!"}
+                        value={district}
                         status={
                           dialogSelectedDistrict === district
                             ? "checked"
@@ -144,7 +172,7 @@ const AddStation = () => {
                         onPress={() => setDialogSelectedDistrict(district)}
                       />
                       <Text>{district}</Text>
-                    </View>
+                    </Pressable>
                   );
                 })}
             </ScrollView>

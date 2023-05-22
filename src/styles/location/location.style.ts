@@ -4,6 +4,7 @@ import { Card, IconButton } from "react-native-paper";
 
 export const LocationLayout = styled(SafeAreaView)`
   flex: 1;
+  padding: 20px;
 `;
 
 export const CurrentLocationLayout = styled.View`
