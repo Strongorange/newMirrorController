@@ -1,9 +1,10 @@
 import { View, Text } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import * as S from "../../styles/location/location.style";
 import { FirestoreSettings } from "../../types/firestoreSettings";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Button } from "react-native-paper";
 
 interface CurrentLocationProps {
   settings: FirestoreSettings;
@@ -26,17 +27,27 @@ const CurrentLocation = ({ settings }: CurrentLocationProps) => {
     navigation.navigate("AddStation");
   };
 
+  //EFFECTS
+  useEffect(() => {
+    navigation.setOptions({ title: "현재 측정소" });
+  }, []);
+
   return (
     <S.CurrentLocationLayout>
       {selected.stationName ? (
         <S.CurrentLocationCard mode="contained">
           <S.CurrentLocationCard.Title
-            title="측정소 이름"
+            title={selected.stationName}
             titleStyle={{ fontSize: 20, fontWeight: "bold" }}
-            subtitle="측정소 주소"
+            subtitle={selected.addr}
+            right={() => (
+              <View>
+                <Button onPress={addStation}>수정</Button>
+              </View>
+            )}
           />
           <S.CurrentLocationCard.Content>
-            <S.Text>제공 정보</S.Text>
+            <S.Text>{selected.item}</S.Text>
           </S.CurrentLocationCard.Content>
         </S.CurrentLocationCard>
       ) : (

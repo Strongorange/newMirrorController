@@ -4,6 +4,7 @@ import { Card, IconButton } from "react-native-paper";
 
 export const LocationLayout = styled(SafeAreaView)`
   flex: 1;
+  padding: 20px;
 `;
 
 export const CurrentLocationLayout = styled.View`
@@ -16,7 +17,10 @@ export const CardRow = styled.View`
   flex-direction: row;
 `;
 
-export const Title = styled.Text``;
+export const Title = styled.Text`
+  font-size: 20px;
+  font-weight: bold;
+`;
 
 export const Text = styled.Text``;
 
