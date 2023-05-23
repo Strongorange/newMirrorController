@@ -11,11 +11,15 @@ import FireStorePhotoControls from "../components/home/FireStorePhotoControls";
 import initFB from "../utils/initFirebase";
 import { userState } from "../states/authState";
 import { defaultMessages } from "../types/messagesTypes";
+import { useNavigation } from "@react-navigation/native";
 
 initFB();
 const storage = getStorage();
 
 const HomeOthers = () => {
+  // Navigation
+  const navigation = useNavigation();
+
   // States
   const [user, setUser] = useRecoilState(userState);
   const [showingPhotosAtom, setShowingPhotosAtom] =
@@ -102,6 +106,14 @@ const HomeOthers = () => {
   }, [user]);
 
   useEffect(() => {
+    navigation.setOptions({
+      headerShown: true,
+      title: "미러의 사진",
+    });
+  }, []);
+
+  // 언마운트시 초기화
+  useEffect(() => {
     return () => {
       console.log("HomeOthers 초기화");
       setUser(null);
@@ -125,7 +137,7 @@ const HomeOthers = () => {
 
   return isInitialLoading ? (
     <S.HomeLayout>
-      <S.Text>노루를 데려오는 중</S.Text>
+      <S.Text>사진을 불러오는 중</S.Text>
     </S.HomeLayout>
   ) : (
     <S.HomeLayout>

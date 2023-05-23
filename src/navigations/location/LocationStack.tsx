@@ -11,7 +11,13 @@ const LocationStack = createNativeStackNavigator<StackParamList>();
 
 const LocationNavigation = () => {
   return (
-    <LocationStack.Navigator>
+    <LocationStack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: "#FFFBFF",
+        },
+      }}
+    >
       <LocationStack.Screen name="Location" component={Location} />
       <LocationStack.Screen name="AddStation" component={AddStation} />
     </LocationStack.Navigator>

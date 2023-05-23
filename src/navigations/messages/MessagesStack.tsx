@@ -14,7 +14,13 @@ const MessagesStack = createNativeStackNavigator<StackParamList>();
 
 const MessagesNavigation = () => {
   return (
-    <MessagesStack.Navigator>
+    <MessagesStack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: "#FFFBFF",
+        },
+      }}
+    >
       <MessagesStack.Screen
         name="MessagesMain"
         options={{ title: "Message" }}

@@ -6,14 +6,14 @@ import HomeOthers from "../screens/HomeOthers";
 import MessagesNavigation from "./messages/MessagesStack";
 import Location from "../screens/location/Location";
 import LocationNavigation from "./location/LocationStack";
+import { MD3Colors } from "react-native-paper";
 
 const BottomTabs = createBottomTabNavigator();
 
 const OthersTabs = () => {
   return (
     <BottomTabs.Navigator
-      //FIXME: DB 사용량 아끼기 위해서 Messages로 변경 개발 완료 후 Photos로 변경
-      initialRouteName="LocationStack"
+      initialRouteName="Photos"
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName = "";
@@ -23,11 +23,23 @@ const OthersTabs = () => {
             iconName = focused
               ? "chatbox-ellipses"
               : "chatbox-ellipses-outline";
+          } else if (route.name === "LocationStack") {
+            iconName = focused ? "location" : "location-outline";
+          } else if (route.name === "Settings") {
+            iconName = focused ? "settings" : "settings-outline";
           }
 
           return <Icon name={iconName} size={size} color={color} />;
         },
         headerShown: false,
+        tabBarStyle: {
+          backgroundColor: "#FFFBFF",
+        },
+        tabBarLabel: () => null,
+        tabBarActiveTintColor: MD3Colors.primary60,
+        headerStyle: {
+          backgroundColor: "#FFFBFF",
+        },
       })}
     >
       <BottomTabs.Screen name="Photos" component={HomeOthers} />

@@ -9,6 +9,7 @@ import { userState } from "../states/authState";
 import { MessagesType } from "../types/messagesTypes";
 import * as S from "../styles/messages/messages.style";
 import MessageGrid from "../components/messages/MessageGrid";
+import { View } from "react-native";
 
 const Messages = () => {
   const [messages, setMessages] = useRecoilState(messagesState);
@@ -70,7 +71,11 @@ const Messages = () => {
 
   return (
     <S.MessagesLayout style={{ flex: 1 }}>
-      {isLoading && <ActivityIndicator size={68} />}
+      {isLoading && (
+        <View style={{ flex: 1, justifyContent: "center" }}>
+          <ActivityIndicator size={68} />
+        </View>
+      )}
       {!isLoading && <MessageGrid messages={messages} />}
     </S.MessagesLayout>
   );
