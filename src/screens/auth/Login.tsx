@@ -1,20 +1,25 @@
-import React, { useEffect, useState } from "react";
-import * as S from "../../styles/auth/Login.style";
-import initFB from "../../utils/initFirebase";
+import React, { useEffect, useRef, useState } from "react";
+import * as S from "../../styles/auth/Auth.style";
 import auth from "@react-native-firebase/auth";
-import { useNavigation, TypedNavigator } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { useSetRecoilState } from "recoil";
 import { userState } from "../../states/authState";
+import { MD3Colors } from "react-native-paper";
 
 const Login = () => {
+  // Navigation 아동을 위한 navigation 객체
+  const navigation = useNavigation();
+
   // states
   const [email, setEmail] = useState<string>("");
+  const [emailError, setEmailError] = useState(false);
   const [password, setPassword] = useState<string>("");
   const setUser = useSetRecoilState(userState);
 
-  // Navigation 아동을 위한 navigation 객체
-  const navigation = useNavigation();
-  // functions
+  //REFS
+  const passwordRef = useRef(null);
+
+  // FUNCTIONS
   const handleEmail = (email: string) => {
     setEmail(email);
   };
@@ -46,30 +51,74 @@ const Login = () => {
     }
   };
 
+  const handleSignUpButton = () => {
+    setEmail("");
+    setPassword("");
+    //@ts-ignore
+    navigation.navigate("SignUp");
+  };
+
+  const focuseNextInput = (nextInput: any) => {
+    if (nextInput) {
+      nextInput.current.focus();
+    }
+  };
+
+  // EFFECTS
+  useEffect(() => {
+    // email 값이 email 형식이 맞는지 확인
+    // 이메일이 5글자 이상일때만 확인
+    const emailRegex = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[A-Za-z]+$/;
+    if (email.length > 7) {
+      emailRegex.test(email) ? setEmailError(false) : setEmailError(true);
+    } else {
+      setEmailError(false);
+    }
+  }, [email]);
+
   return (
-    <S.LoginLayout>
-      <S.LoginForm>
+    <S.AuthLayout>
+      <S.AuthForm>
         <S.InputWrapper>
           <S.FormInput
             mode="flat"
-            label={"email"}
+            label={"이메일"}
             value={email}
+            error={emailError}
             onChangeText={(text) => handleEmail(text)}
+            textContentType="emailAddress"
+            keyboardType="email-address"
+            blurOnSubmit={false}
+            returnKeyType="next"
+            onSubmitEditing={() => focuseNextInput(passwordRef)}
           />
+
           <S.FormInput
+            ref={passwordRef}
             mode="flat"
-            label={"password"}
+            label={"비밀번호"}
             value={password}
             onChangeText={(text) => handlePassword(text)}
+            secureTextEntry
+            textContentType="password"
+            blurOnSubmit={false}
+            returnKeyType="done"
           />
         </S.InputWrapper>
         <S.ButtonWrapper>
           <S.FormButton mode="contained" onPress={handleLogin}>
-            제출
+            로그인
+          </S.FormButton>
+          <S.FormButton
+            mode="contained"
+            onPress={handleSignUpButton}
+            buttonColor={MD3Colors.primary60}
+          >
+            회원가입
           </S.FormButton>
         </S.ButtonWrapper>
-      </S.LoginForm>
-    </S.LoginLayout>
+      </S.AuthForm>
+    </S.AuthLayout>
   );
 };
 
