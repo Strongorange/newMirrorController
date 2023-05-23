@@ -24,7 +24,7 @@ const Settings = () => {
           setStoragePhoto([]);
           setShowingPhotos([]);
           //@ts-ignore
-          navigation.navigate("Login");
+          navigation.navigate("AuthStack", { screen: "Login" });
         });
     } catch (error) {
       console.log(error);
