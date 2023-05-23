@@ -1,19 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
+import * as S from "../styles/settings/settings.style";
 import { Button } from "react-native-paper";
 import auth from "@react-native-firebase/auth";
-import { useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import { userState } from "../states/authState";
 import { useNavigation } from "@react-navigation/native";
 import { storagePhotosState } from "../states/storagePhotosState";
 import { showingPhotosState } from "../states/showingPhotosState";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const Settings = () => {
-  const setUser = useSetRecoilState(userState);
+  const [user, setUser] = useRecoilState(userState);
   const setStoragePhoto = useSetRecoilState(storagePhotosState);
   const setShowingPhotos = useSetRecoilState(showingPhotosState);
   const navigation = useNavigation();
-  // initFB();
 
   const handleLogout = () => {
     try {
@@ -31,12 +30,23 @@ const Settings = () => {
     }
   };
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: true,
+    });
+  }, []);
+
   return (
-    <SafeAreaView>
+    <S.SettingsLayout>
+      <S.UserInfoContainer>
+        <S.EmailText>
+          나의 이메일 <S.Strong>{user?.email}</S.Strong>
+        </S.EmailText>
+      </S.UserInfoContainer>
       <Button mode="contained" onPress={handleLogout}>
         로그아웃
       </Button>
-    </SafeAreaView>
+    </S.SettingsLayout>
   );
 };
 

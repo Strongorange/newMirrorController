@@ -44,6 +44,7 @@ export const CardText = styled.Text`
 export const MessageCRUDLayout = styled.View`
   flex: 1;
   position: relative;
+  padding: 20px;
 `;
 
 export const CRUDItemWrapper = styled.View`
