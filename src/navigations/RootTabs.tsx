@@ -2,6 +2,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../screens/Home";
 import Messages from "../screens/Messages";
 import Icon from "react-native-vector-icons/Ionicons";
+import Settings from "../screens/Settings";
 
 const BottomTabs = createBottomTabNavigator();
 
@@ -25,6 +26,7 @@ const RootTabs = () => {
     >
       <BottomTabs.Screen name="Photos" component={Home} />
       <BottomTabs.Screen name="Messages" component={Messages} />
+      <BottomTabs.Screen name="Settings" component={Settings} />
     </BottomTabs.Navigator>
   );
 };

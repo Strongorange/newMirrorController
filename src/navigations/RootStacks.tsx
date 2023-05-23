@@ -1,12 +1,12 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Home from "../screens/Home";
+import Login from "../screens/auth/Login";
 
 const RootStacksNav = createNativeStackNavigator();
 
 const RootStacks = () => {
   return (
     <RootStacksNav.Navigator>
-      <RootStacksNav.Screen name="StackOne" component={Home} />
+      <RootStacksNav.Screen name="Login" component={Login} />
     </RootStacksNav.Navigator>
   );
 };
