@@ -37,17 +37,23 @@ const FireStorePhotos = () => {
 
   return (
     <S.FirestorePhotosLayout key={"wow"}>
-      <S.FlatListContainer>
-        <S.ImageFlatList
-          data={storagePhotos}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          numColumns={2}
-          initialNumToRender={8}
-          windowSize={12}
-          removeClippedSubviews
-        />
-      </S.FlatListContainer>
+      {storagePhotos.length === 0 ? (
+        <S.NoImagesContainer>
+          <S.NoImagesText>사진을 저장소에 등록하세요!</S.NoImagesText>
+        </S.NoImagesContainer>
+      ) : (
+        <S.FlatListContainer>
+          <S.ImageFlatList
+            data={storagePhotos}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
+            numColumns={2}
+            initialNumToRender={8}
+            windowSize={12}
+            removeClippedSubviews
+          />
+        </S.FlatListContainer>
+      )}
     </S.FirestorePhotosLayout>
   );
 };
