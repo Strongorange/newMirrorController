@@ -15,7 +15,15 @@ const CurrentPhotos = () => {
   return (
     <S.CurrentPhotoContainer>
       <S.CurrentPhotoTitle>현재</S.CurrentPhotoTitle>
-      <FlatList data={showingPhoto} horizontal renderItem={renderItem} />
+      {showingPhoto.length === 0 ? (
+        <S.NoCurrentPhotos>
+          <S.NoCurrentPhotosText>
+            거울에 보일 사진을 등록해주세요!
+          </S.NoCurrentPhotosText>
+        </S.NoCurrentPhotos>
+      ) : (
+        <FlatList data={showingPhoto} horizontal renderItem={renderItem} />
+      )}
     </S.CurrentPhotoContainer>
   );
 };

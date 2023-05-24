@@ -26,3 +26,14 @@ export const Image = styled(FastImage)`
   height: ${`${width / 2}px`};
   z-index: 0;
 `;
+
+export const NoImagesContainer = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const NoImagesText = styled.Text`
+  font-size: 18px;
+  font-weight: 600;
+`;
