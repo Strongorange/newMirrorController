@@ -22,3 +22,14 @@ export const Image = styled(FastImage)`
   height: ${`${width / 2.5}px`};
   position: relative;
 `;
+
+export const NoCurrentPhotos = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const NoCurrentPhotosText = styled.Text`
+  font-size: 18px;
+  font-weight: 600;
+`;
