@@ -62,9 +62,10 @@ const MessagesCRUD = ({ route }: MessagesCRUDProps) => {
           await documentRef.update({
             [key]: firestore.FieldValue.arrayRemove(willChangeMessage),
           });
-          closeDialog();
         } catch (error) {
           console.log(error);
+        } finally {
+          closeDialog();
         }
       } else {
         console.log("document does not exist");

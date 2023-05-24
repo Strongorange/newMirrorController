@@ -39,7 +39,6 @@ const CreateMessageModal = ({
         console.log("document not exists");
       }
       closeModal();
-      console.log("추가 완료");
     } catch (error) {
       console.log(error);
     }

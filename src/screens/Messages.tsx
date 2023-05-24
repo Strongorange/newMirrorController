@@ -6,15 +6,17 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { messagesState } from "../states/messagesState";
 import { ActivityIndicator } from "react-native-paper";
 import { userState } from "../states/authState";
-import { MessagesType } from "../types/messagesTypes";
+import { defaultMessages, MessagesType } from "../types/messagesTypes";
 import * as S from "../styles/messages/messages.style";
 import MessageGrid from "../components/messages/MessageGrid";
 import { View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 const Messages = () => {
   const [messages, setMessages] = useRecoilState(messagesState);
   const [isLoading, setIsLoading] = useState(true);
   const user = useRecoilValue(userState);
+  const navigation = useNavigation();
 
   // FUNCTIONS
 
@@ -42,31 +44,58 @@ const Messages = () => {
     console.log(error);
   };
 
-  // EFFECTS
-
-  useEffect(() => {
-    setIsLoading(true);
+  const checkMessagesRef = async () => {
     let messageUnsubscribe: () => void;
-    try {
-      messageUnsubscribe = firestore()
-        .collection(user?.uid || "")
-        .doc("messages")
-        .onSnapshot(onResultMessage, onError);
-    } catch (error) {
-      console.log(error);
+    if (user) {
+      setIsLoading(true);
+      const docuemntRef = firestore().collection(user.uid).doc("messages");
+      const document = await docuemntRef.get();
+      if (!document.exists) {
+        await docuemntRef.set(defaultMessages);
+        checkMessagesRef();
+      } else {
+        try {
+          messageUnsubscribe = firestore()
+            .collection(user.uid)
+            .doc("messages")
+            .onSnapshot(onResultMessage, onError);
+        } catch (error) {
+          console.log(error);
+        }
+      }
     }
-
-    // 언마운트시 구독 해제
     return () => {
       if (messageUnsubscribe) {
         messageUnsubscribe();
       }
     };
-  }, []);
+  };
+
+  // EFFECTS
+
+  useEffect(() => {
+    if (user === null) {
+      //@ts-ignore
+      navigation.navigate("AuthStack");
+      return;
+    } else {
+      console.log("message User", user);
+      setIsLoading(true);
+      let messageUnsubscribe: () => void;
+      checkMessagesRef();
+
+      // 언마운트시 구독 해제
+      return () => {
+        if (messageUnsubscribe) {
+          messageUnsubscribe();
+        }
+      };
+    }
+  }, [user]);
 
   // 디버깅
   useEffect(() => {
-    console.log(messages);
+    console.log("messages", messages);
   }, [messages]);
 
   return (
