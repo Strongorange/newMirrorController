@@ -73,15 +73,11 @@ const FireStorePhotoControls = () => {
         });
 
         const storage = getStorage();
-        const currentTime = new Intl.DateTimeFormat("ko-KR", {
-          dateStyle: "full",
-          timeStyle: "full",
-          hour12: false,
-        }).format(new Date());
+
         // 로그인된 User의 uid별로 FireStorage에 폴더를 만들어서 저장
         const fileRef: any = ref(
           storage,
-          `/${user ? user.uid : "unknown"}/${currentTime}.${
+          `/${user ? user.uid : "unknown"}/${uuidv4()}.${
             isVideo ? "gif" : "jpg"
           }`
         );
@@ -92,7 +88,12 @@ const FireStorePhotoControls = () => {
 
         setStoragePhotos((state) => [
           ...state,
-          { uri: downloadUrl, path: storagePath, createdAt: createdTime },
+          {
+            id: createdTime,
+            uri: downloadUrl,
+            path: storagePath,
+            createdAt: createdTime,
+          },
         ]);
         console.log("업로드 끝");
       } catch (error) {
