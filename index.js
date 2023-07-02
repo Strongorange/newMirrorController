@@ -1,4 +1,6 @@
 import { registerRootComponent } from "expo";
+import "intl";
+import "intl/locale-data/jsonp/ko";
 
 import App from "./App";
 
