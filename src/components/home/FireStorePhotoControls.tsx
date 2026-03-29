@@ -101,10 +101,15 @@ const FireStorePhotoControls = () => {
         console.log(error);
       }
     },
-    []
+    [setStoragePhotos, user]
   );
 
   const addPhoto = useCallback(async () => {
+    if (!user) {
+      Alert.alert("로그인이 필요합니다.");
+      return;
+    }
+
     if (storagePhotosControl.isPhotoLoading) return;
     setStoragePhotosControl((prev) => ({
       ...prev,
@@ -155,7 +160,15 @@ const FireStorePhotoControls = () => {
       closeModal();
       console.log("취소");
     }
-  }, []);
+  }, [
+    changeModalContent,
+    closeModal,
+    openModal,
+    setStoragePhotosControl,
+    storagePhotosControl.isPhotoLoading,
+    uploadToFirebase,
+    user,
+  ]);
 
   return (
     <>

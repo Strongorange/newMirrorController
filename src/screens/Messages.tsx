@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import firestore, {
   FirebaseFirestoreTypes,
 } from "@react-native-firebase/firestore";
@@ -18,79 +18,54 @@ const Messages = () => {
   const user = useRecoilValue(userState);
   const navigation = useNavigation();
 
-  // FUNCTIONS
-
-  const onResultMessage = useCallback(
-    (
-      QuerySnapshot: FirebaseFirestoreTypes.DocumentSnapshot<FirebaseFirestoreTypes.DocumentData>
-    ) => {
-      const data = QuerySnapshot.data();
-
-      console.log(data);
-      if (data) {
-        // as 로 타입 단언
-        const messages = data as MessagesType;
-        setMessages(messages);
-      }
-
-      if (messages) {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
-
-  const onError = (error: Error) => {
-    console.log(error);
-  };
-
-  const checkMessagesRef = async () => {
-    let messageUnsubscribe: () => void;
-    if (user) {
-      setIsLoading(true);
-      const docuemntRef = firestore().collection(user.uid).doc("messages");
-      const document = await docuemntRef.get();
-      if (!document.exists) {
-        await docuemntRef.set(defaultMessages);
-        checkMessagesRef();
-      } else {
-        try {
-          messageUnsubscribe = firestore()
-            .collection(user.uid)
-            .doc("messages")
-            .onSnapshot(onResultMessage, onError);
-        } catch (error) {
-          console.log(error);
-        }
-      }
-    }
-    return () => {
-      if (messageUnsubscribe) {
-        messageUnsubscribe();
-      }
-    };
-  };
-
-  // EFFECTS
-
   useEffect(() => {
     if (user === null) {
       //@ts-ignore
       navigation.navigate("AuthStack");
+      setIsLoading(false);
       return;
-    } else {
-      console.log("message User", user);
-      setIsLoading(true);
-      let messageUnsubscribe: () => void;
-      checkMessagesRef();
-
-      // 언마운트시 구독 해제
-      return () => {
-        if (messageUnsubscribe) {
-          messageUnsubscribe();
-        }
-      };
     }
+
+    const documentRef = firestore().collection(user.uid).doc("messages");
+    let unsubscribe: (() => void) | undefined;
+
+    const subscribe = async () => {
+      setIsLoading(true);
+
+      const document = await documentRef.get();
+      if (!document.exists) {
+        await documentRef.set(defaultMessages);
+      }
+
+      unsubscribe = documentRef.onSnapshot(
+        (
+          querySnapshot: FirebaseFirestoreTypes.DocumentSnapshot<FirebaseFirestoreTypes.DocumentData>
+        ) => {
+          const data = querySnapshot.data();
+
+          if (data) {
+            setMessages(data as MessagesType);
+          }
+
+          setIsLoading(false);
+        },
+        (error: Error) => {
+          console.log(error);
+          setIsLoading(false);
+        }
+      );
+    };
+
+    subscribe().catch((error) => {
+      console.log(error);
+      setIsLoading(false);
+    });
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, [user]);
 
   // 디버깅

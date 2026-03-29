@@ -14,17 +14,14 @@ const Settings = () => {
   const setShowingPhotos = useSetRecoilState(showingPhotosState);
   const navigation = useNavigation();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
-      auth()
-        .signOut()
-        .then(() => {
-          setUser(null);
-          setStoragePhoto([]);
-          setShowingPhotos([]);
-          //@ts-ignore
-          navigation.navigate("AuthStack", { screen: "Login" });
-        });
+      await auth().signOut();
+      setUser(null);
+      setStoragePhoto([]);
+      setShowingPhotos([]);
+      //@ts-ignore
+      navigation.navigate("AuthStack", { screen: "Login" });
     } catch (error) {
       console.log(error);
     }

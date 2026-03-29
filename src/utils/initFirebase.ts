@@ -7,7 +7,7 @@ import {
   FB_PROJECT_ID,
   FB_STORAGE_BUCKET,
 } from "@env";
-import { initializeApp } from "firebase/app";
+import { getApp, getApps, initializeApp } from "firebase/app";
 
 const firebaseConfig = {
   apiKey: FB_API_KEY,
@@ -19,7 +19,11 @@ const firebaseConfig = {
 };
 
 const initFB = () => {
-  initializeApp(firebaseConfig);
+  if (getApps().length > 0) {
+    return getApp();
+  }
+
+  return initializeApp(firebaseConfig);
 };
 
 export default initFB;

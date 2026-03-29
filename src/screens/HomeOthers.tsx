@@ -3,7 +3,7 @@ import firestore from "@react-native-firebase/firestore";
 import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage";
 import * as S from "../styles/home.style";
 import CurrentPhotos from "../components/home/CurrentPhotos";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState } from "recoil";
 import { showingPhotosState } from "../states/showingPhotosState";
 import FireStorePhotos from "../components/home/FireStorePhotos";
 import { StoragePhoto, storagePhotosState } from "../states/storagePhotosState";
@@ -21,9 +21,8 @@ const HomeOthers = () => {
   const navigation = useNavigation();
 
   // States
-  const [user, setUser] = useRecoilState(userState);
-  const [showingPhotosAtom, setShowingPhotosAtom] =
-    useRecoilState(showingPhotosState);
+  const [user] = useRecoilState(userState);
+  const [, setShowingPhotosAtom] = useRecoilState(showingPhotosState);
   const [storagePhotosAtom, setStoragePhotosAtom] =
     useRecoilState(storagePhotosState);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -97,7 +96,6 @@ const HomeOthers = () => {
 
       // storage에서 사진 가져오기
       getStoragePhotos();
-      setIsInitialLoading(false);
 
       return () => {
         galleryUnsubscribe();
@@ -110,16 +108,6 @@ const HomeOthers = () => {
       headerShown: true,
       title: "미러의 사진",
     });
-  }, []);
-
-  // 언마운트시 초기화
-  useEffect(() => {
-    return () => {
-      console.log("HomeOthers 초기화");
-      setUser(null);
-      setShowingPhotosAtom([]);
-      setStoragePhotosAtom([]);
-    };
   }, []);
 
   // 디버깅
