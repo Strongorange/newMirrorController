@@ -4,10 +4,10 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 buildscript {
     ext {
-        buildToolsVersion = findProperty('android.buildToolsVersion') ?: '31.0.0'
+        buildToolsVersion = findProperty('android.buildToolsVersion') ?: '33.0.1'
         minSdkVersion = Integer.parseInt(findProperty('android.minSdkVersion') ?: '24')
-        compileSdkVersion = Integer.parseInt(findProperty('android.compileSdkVersion') ?: '31')
-        targetSdkVersion = Integer.parseInt(findProperty('android.targetSdkVersion') ?: '31')
+        compileSdkVersion = Integer.parseInt(findProperty('android.compileSdkVersion') ?: '33')
+        targetSdkVersion = Integer.parseInt(findProperty('android.targetSdkVersion') ?: '33')
         if (findProperty('android.kotlinVersion')) {
             kotlinVersion = findProperty('android.kotlinVersion')
         }
@@ -41,6 +41,16 @@ allprojects {
     configurations.all {
         resolutionStrategy {
             force "com.facebook.react:react-native:" + REACT_NATIVE_VERSION
+            eachDependency { details ->
+                if (
+                    details.requested.group == "com.github.CanHub" &&
+                    details.requested.name == "Android-Image-Cropper" &&
+                    details.requested.version == "1.1.1"
+                ) {
+                    details.useVersion "e81a7d8eb1d2016588a63ef4cd705356341424d9"
+                    details.because("restore the original 1.1.1 API through the matching JitPack commit")
+                }
+            }
         }
     }
 
