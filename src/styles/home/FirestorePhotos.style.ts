@@ -27,6 +27,19 @@ export const Image = styled(FastImage)`
   z-index: 0;
 `;
 
+export const VideoBadge = styled.Text`
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 4px 6px;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.7);
+  font-size: 11px;
+  font-weight: 700;
+  overflow: hidden;
+  z-index: 1;
+`;
+
 export const NoImagesContainer = styled.View`
   flex: 1;
   align-items: center;

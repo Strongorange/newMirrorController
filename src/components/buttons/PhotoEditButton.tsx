@@ -1,15 +1,15 @@
 import React from "react";
 import { useModal } from "../../hooks/useModal";
-import { StoragePhoto } from "../../states/storagePhotosState";
 import * as S from "../../styles/buttons/PhotoEditButton.style";
 import DeletePhotoModalContent from "../home/DeletePhotoModalContent";
 import SwitchPhotoModalContent from "../home/SwitchPhotoModalContent";
+import { MirrorLibraryItem } from "../../types/mediaTypes";
 
 type PhotoEditButtonProps = {
   variant: "delete" | "change";
   compact?: boolean;
   visible: boolean;
-  item: StoragePhoto;
+  item: MirrorLibraryItem;
 };
 
 const PhotoEditButton = ({

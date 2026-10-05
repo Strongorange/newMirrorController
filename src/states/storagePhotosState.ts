@@ -1,13 +1,7 @@
 import { atom, selector } from "recoil";
+import { MirrorLibraryItem } from "../types/mediaTypes";
 
-export interface StoragePhoto {
-  id?: string;
-  path: string;
-  uri: string;
-  createdAt?: string;
-}
-
-export const storagePhotosState = atom<StoragePhoto[]>({
+export const storagePhotosState = atom<MirrorLibraryItem[]>({
   key: "storagePhotosState",
   default: [],
 });

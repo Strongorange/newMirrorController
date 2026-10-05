@@ -1,1 +1,3 @@
-export type ShowingPhtos = string[];
+import { MirrorGallerySlots } from "./mediaTypes";
+
+export type ShowingPhtos = MirrorGallerySlots;

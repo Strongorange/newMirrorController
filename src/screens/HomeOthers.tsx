@@ -1,20 +1,28 @@
-import React, { useState, useEffect } from "react";
-import firestore from "@react-native-firebase/firestore";
-import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage";
+import React, { useState, useEffect, useCallback } from "react";
 import * as S from "../styles/home.style";
 import CurrentPhotos from "../components/home/CurrentPhotos";
 import { useRecoilState } from "recoil";
 import { showingPhotosState } from "../states/showingPhotosState";
 import FireStorePhotos from "../components/home/FireStorePhotos";
-import { StoragePhoto, storagePhotosState } from "../states/storagePhotosState";
+import { storagePhotosState } from "../states/storagePhotosState";
 import FireStorePhotoControls from "../components/home/FireStorePhotoControls";
 import initFB from "../utils/initFirebase";
 import { userState } from "../states/authState";
-import { defaultMessages } from "../types/messagesTypes";
 import { useNavigation } from "@react-navigation/native";
+import {
+  createEmptyGallerySlots,
+  createMirrorGalleryDoc,
+  sanitizeMirrorGallerySlots,
+} from "../types/mediaTypes";
+import {
+  listMirrorLibraryItems,
+  MIRROR_GALLERY_COLLECTION,
+  MIRROR_GALLERY_DOC_ID,
+  observeMirrorGalleryDoc,
+  saveMirrorGalleryDoc,
+} from "../utils/mirrorMedia";
 
 initFB();
-const storage = getStorage();
 
 const HomeOthers = () => {
   // Navigation
@@ -27,81 +35,60 @@ const HomeOthers = () => {
     useRecoilState(storagePhotosState);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  // Functions
-  // Functions
-
-  const initializeFirestore = async (uid: string) => {
-    const collectionRef = firestore().collection(`${uid}`);
-
-    const createGalleryDocPromise = await collectionRef.doc("gallery").set({
-      photos: [],
-    });
-    const createMessageDocPromise = await collectionRef
-      .doc("messages")
-      .set(defaultMessages);
+  const initializeMirrorGallery = useCallback(async () => {
     try {
-      await Promise.all([createGalleryDocPromise, createMessageDocPromise]);
+      await saveMirrorGalleryDoc(createMirrorGalleryDoc());
     } catch (error) {
       console.log(error);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    console.log("useEffect의 user", user?.email);
     if (user) {
       const getStoragePhotos = async () => {
         try {
-          const listRef = ref(storage, `/${user?.uid}/`);
-          const storageResponse = await listAll(listRef);
-          const storagePhotos: StoragePhoto[] = [];
-
-          for (const itemRef of storageResponse.items) {
-            const reference: any = ref(storage, itemRef.fullPath);
-            const downloadUrl = await getDownloadURL(reference);
-            const newImage = {
-              uri: downloadUrl,
-              path: reference._location.path,
-              id: reference._location.path,
-            };
-            storagePhotos.push(newImage);
-          }
-
+          const storagePhotos = await listMirrorLibraryItems();
           setStoragePhotosAtom(storagePhotos);
         } catch (error) {
           console.log(error);
         } finally {
-          setTimeout(() => {
-            setIsInitialLoading(false);
-          }, 1000);
+          setIsInitialLoading(false);
         }
       };
 
       setIsInitialLoading(true);
 
-      // fireStore에서 Gallery 정보 가져오기
-      const collectionRef = firestore().collection(`${user!.uid}`);
-      const galleryUnsubscribe = collectionRef.doc("gallery").onSnapshot(
+      const galleryUnsubscribe = observeMirrorGalleryDoc(
         async (documentSnapshot) => {
-          if (!documentSnapshot.exists) {
-            console.log("No such document!", user!.uid);
-            await initializeFirestore(user.uid);
+          const nextSlots = sanitizeMirrorGallerySlots(
+            documentSnapshot.data()?.slots
+          );
+          const needsReset =
+            !documentSnapshot.exists() ||
+            documentSnapshot.data()?.schemaVersion !== 2;
+
+          if (needsReset) {
+            await initializeMirrorGallery();
           }
-          const showingPhotos = documentSnapshot.data()?.photos;
-          if (showingPhotos) {
-            setShowingPhotosAtom(showingPhotos);
-          }
+
+          setShowingPhotosAtom(
+            needsReset ? createEmptyGallerySlots() : nextSlots
+          );
         },
         (error) => console.log(error)
       );
 
-      // storage에서 사진 가져오기
       getStoragePhotos();
 
       return () => {
         galleryUnsubscribe();
       };
+    } else {
+      setShowingPhotosAtom(createEmptyGallerySlots());
+      setStoragePhotosAtom([]);
+      setIsInitialLoading(false);
     }
-  }, [user]);
+  }, [initializeMirrorGallery, setShowingPhotosAtom, setStoragePhotosAtom, user]);
 
   useEffect(() => {
     navigation.setOptions({

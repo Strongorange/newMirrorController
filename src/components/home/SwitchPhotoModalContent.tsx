@@ -1,16 +1,22 @@
 import { Alert } from "react-native";
 import React from "react";
 import * as S from "../../styles/home/SwitchPhotoModalContent.style";
-import { StoragePhoto } from "../../states/storagePhotosState";
 import { showingPhotosState } from "../../states/showingPhotosState";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { storagePhotosControlState } from "../../states/storagePhotosControlState";
-import firestore from "@react-native-firebase/firestore";
 import { userState } from "../../states/authState";
 import { useNavigation } from "@react-navigation/native";
+import {
+  createMirrorGalleryDoc,
+  getMirrorMediaPreviewSrc,
+  MirrorGallerySlots,
+  MirrorLibraryItem,
+  toMirrorGallerySlot,
+} from "../../types/mediaTypes";
+import { saveMirrorGalleryDoc } from "../../utils/mirrorMedia";
 
 interface SwitchPhotoModalContentProps {
-  item: StoragePhoto;
+  item: MirrorLibraryItem;
 }
 
 const SwitchPhotoModalContent = ({ item }: SwitchPhotoModalContentProps) => {
@@ -29,15 +35,16 @@ const SwitchPhotoModalContent = ({ item }: SwitchPhotoModalContentProps) => {
           isPhotoLoading: true,
         }));
         const currentPhotoArr = [...showingPhotos];
-        currentPhotoArr[index] = item.uri;
-        setShowingPhotos(currentPhotoArr);
-
-        await firestore().collection(user.uid).doc("gallery").set({
-          photos: currentPhotoArr,
-        });
+        currentPhotoArr[index] = toMirrorGallerySlot(item);
+        const nextGalleryDoc = createMirrorGalleryDoc(
+          currentPhotoArr as MirrorGallerySlots
+        );
+        await saveMirrorGalleryDoc(nextGalleryDoc);
+        setShowingPhotos(nextGalleryDoc.slots);
         Alert.alert("변경 완료", "사진이 변경되었습니다.");
       } catch (error) {
         console.log(error);
+        Alert.alert("변경 실패", "사진 변경 내용을 저장하지 못했습니다.");
       } finally {
         setStoragePhotosControl((prev) => ({
           ...prev,
@@ -56,25 +63,41 @@ const SwitchPhotoModalContent = ({ item }: SwitchPhotoModalContentProps) => {
   return (
     <S.SwitchPhotoModalLayout>
       <S.Element>
-        <S.Image source={{ uri: showingPhotos[0] }} />
+        {showingPhotos[0] ? (
+          <S.Image source={{ uri: getMirrorMediaPreviewSrc(showingPhotos[0]) }} />
+        ) : (
+          <S.ImagePlaceholder />
+        )}
         <S.Button mode="contained-tonal" onPress={() => changeShowingPhoto(0)}>
           첫번째
         </S.Button>
       </S.Element>
       <S.Element>
-        <S.Image source={{ uri: showingPhotos[1] }} />
+        {showingPhotos[1] ? (
+          <S.Image source={{ uri: getMirrorMediaPreviewSrc(showingPhotos[1]) }} />
+        ) : (
+          <S.ImagePlaceholder />
+        )}
         <S.Button mode="contained-tonal" onPress={() => changeShowingPhoto(1)}>
           두번째
         </S.Button>
       </S.Element>
       <S.Element>
-        <S.Image source={{ uri: showingPhotos[2] }} />
+        {showingPhotos[2] ? (
+          <S.Image source={{ uri: getMirrorMediaPreviewSrc(showingPhotos[2]) }} />
+        ) : (
+          <S.ImagePlaceholder />
+        )}
         <S.Button mode="contained-tonal" onPress={() => changeShowingPhoto(2)}>
           세번째
         </S.Button>
       </S.Element>
       <S.Element>
-        <S.Image source={{ uri: showingPhotos[3] }} />
+        {showingPhotos[3] ? (
+          <S.Image source={{ uri: getMirrorMediaPreviewSrc(showingPhotos[3]) }} />
+        ) : (
+          <S.ImagePlaceholder />
+        )}
         <S.Button mode="contained-tonal" onPress={() => changeShowingPhoto(3)}>
           네번째
         </S.Button>

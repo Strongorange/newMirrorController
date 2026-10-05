@@ -22,3 +22,9 @@ export const Image = styled(FastImage)`
   width: 100px;
   height: 100px;
 `;
+
+export const ImagePlaceholder = styled.View`
+  width: 100px;
+  height: 100px;
+  background-color: #f0f0f0;
+`;

@@ -17,10 +17,26 @@ export const CurrentPhotoTitle = styled.Text`
 
 export const CurrentPhotoSlider = styled.FlatList``;
 
+export const ImageWrapper = styled.View`
+  position: relative;
+`;
+
 export const Image = styled(FastImage)`
   width: ${`${width / 2.5}px`};
   height: ${`${width / 2.5}px`};
   position: relative;
+`;
+
+export const VideoBadge = styled.Text`
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 4px 6px;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.7);
+  font-size: 11px;
+  font-weight: 700;
+  overflow: hidden;
 `;
 
 export const NoCurrentPhotos = styled.View`

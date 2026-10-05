@@ -7,6 +7,7 @@ import { userState } from "../states/authState";
 import { useNavigation } from "@react-navigation/native";
 import { storagePhotosState } from "../states/storagePhotosState";
 import { showingPhotosState } from "../states/showingPhotosState";
+import { createEmptyGallerySlots } from "../types/mediaTypes";
 
 const Settings = () => {
   const [user, setUser] = useRecoilState(userState);
@@ -19,7 +20,7 @@ const Settings = () => {
       await auth().signOut();
       setUser(null);
       setStoragePhoto([]);
-      setShowingPhotos([]);
+      setShowingPhotos(createEmptyGallerySlots());
       //@ts-ignore
       navigation.navigate("AuthStack", { screen: "Login" });
     } catch (error) {
