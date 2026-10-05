@@ -20,3 +20,6 @@ buck-out/
 
 # Bundle artifacts
 *.jsbundle
+
+/app/src/main/res/drawable-*/node_modules_*
+/app/src/main/res/raw/node_modules_*
